@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView
+        android:id="@+id/tab_colorImageView"
+        android:layout_width="3dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="@id/tab_textView"
+        android:paddingTop="5dp"
+        android:paddingBottom="3dp"
+        app:layout_constraintBottom_toBottomOf="@id/tab_textView"
+        app:layout_constraintEnd_toStartOf="@id/tab_textView"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        android:src="@color/deepDark"
+        app:layout_constraintStart_toStartOf="parent"/>
+    <TextView
+        android:id="@+id/tab_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="201"
+        android:layout_marginStart="4dp"
+        android:textColor="@drawable/tabtext_background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tab_colorImageView"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</android.support.constraint.ConstraintLayout>

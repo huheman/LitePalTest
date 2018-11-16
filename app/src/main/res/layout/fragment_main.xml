@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.MainFragment">
+    <com.example.huhep.litepaltest.components.MainToolBar
+        android:id="@+id/mainfragment_toobar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toBottomOf="@id/mainfragment_toobar"
+        app:layout_constraintBottom_toBottomOf="parent">
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/textViewBackground"
+            >
+
+            <ListView
+                android:id="@+id/mainfragment_memolistview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_scrollFlags="scroll|snap"
+                />
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/mainfragment_tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:tabIndicatorHeight="3dp"
+                app:tabIndicatorColor="@color/lightBlue2"
+                app:tabTextColor="@color/deepDark"
+                app:tabSelectedTextColor="@color/deepDeepDark"
+                app:tabMode="scrollable"
+                />
+
+        </android.support.design.widget.AppBarLayout>
+        <android.support.v4.view.ViewPager
+            android:id="@+id/mainfragment_viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+    </android.support.design.widget.CoordinatorLayout>
+</LinearLayout>

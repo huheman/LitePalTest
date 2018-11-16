@@ -1,0 +1,12 @@
+<litepal>
+    <dbname value="demo"/>
+    <version value="51"/>
+    <list>
+        <mapping class="com.example.huhep.litepaltest.bean.Bill"/>
+        <mapping class="com.example.huhep.litepaltest.bean.Room"/>
+        <mapping class="com.example.huhep.litepaltest.bean.RoomSet"/>
+        <mapping class="com.example.huhep.litepaltest.bean.MemoTotal"/>
+        <mapping class="com.example.huhep.litepaltest.bean.BillType"/>
+        <mapping class="com.example.huhep.litepaltest.bean.BillSet" />
+    </list>
+</litepal>

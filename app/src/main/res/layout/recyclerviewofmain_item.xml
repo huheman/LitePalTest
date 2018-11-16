@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<android.support.v7.widget.CardView app:cardCornerRadius="5dp"
+    android:layout_margin="5dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/roomitem_constraintlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/roomitem_background"
+        >
+        <TextView
+            android:id="@+id/item_roomNameTipsTextView"
+
+            android:padding="8dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="wrap_content"
+            android:textColor="@color/deepDark"
+            android:layout_height="wrap_content"
+            android:text="房间名称:"/>
+        <TextView
+            android:id="@+id/item_roomNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/deepDeepDark"
+            android:text="206"
+            android:textSize="28dp"
+            app:layout_constraintStart_toEndOf="@id/item_roomNameTipsTextView"
+            app:layout_constraintBottom_toBottomOf="@id/item_roomNameTipsTextView"
+            app:layout_constraintTop_toTopOf="@id/item_roomNameTipsTextView"
+            android:layout_marginStart="4dp"
+            />
+
+        <TextView
+            android:textColor="@android:color/white"
+            android:background="@android:color/holo_blue_light"
+            android:padding="2dp"
+            android:id="@+id/item_occupationTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/item_roomNameTextView"
+            app:layout_constraintBottom_toBottomOf="@id/item_roomNameTextView"
+            app:layout_constraintStart_toEndOf="@id/item_roomNameTextView"
+            android:layout_marginStart="8dp"
+            android:text="已出租"/>
+
+        <TextView
+            android:textColor="@android:color/white"
+            android:background="@android:color/holo_green_light"
+            android:padding="2dp"
+            android:id="@+id/roomitem_paidinwechatTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/item_roomNameTextView"
+            app:layout_constraintBottom_toBottomOf="@id/item_roomNameTextView"
+            app:layout_constraintStart_toEndOf="@id/item_occupationTextView"
+            android:layout_marginStart="8dp"
+            android:text="微信已付"/>
+
+        <ImageView
+            android:id="@+id/roomitem_devider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divediViewHeight"
+            android:src="@color/deepDark"
+            app:layout_constraintBottom_toBottomOf="@id/item_roomNameTextView"/>
+        <TextView
+            android:id="@+id/item_noteTipsTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="备注:"
+            app:layout_constraintTop_toBottomOf="@id/roomitem_devider"
+            android:padding="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/item_noteTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:text="206灯要修一下"
+            android:textColor="@color/deepDeepDark"
+            app:layout_constraintBottom_toBottomOf="@+id/item_noteTipsTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_noteTipsTextView"
+            app:layout_constraintTop_toTopOf="@id/item_noteTipsTextView" />
+
+        <TextView
+            android:id="@+id/main_detailTipsTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="详情:"
+            app:layout_constraintTop_toTopOf="@id/item_detailTextView"
+            android:padding="4dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+        <TextView
+            android:text="上次结账时间是2018年9月20日"
+            android:id="@+id/item_detailTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_noteTextView"
+            app:layout_constraintStart_toEndOf="@id/main_detailTipsTextView"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/deepDeepDark"
+            android:padding="4dp"
+            android:layout_marginEnd="20dp"
+            />
+</android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_title1"
+        android:title="标题1"
+        android:icon="@drawable/ic_talk"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menu_title2"
+        android:title="标题2"
+        android:icon="@drawable/ic_icon_save"
+        app:showAsAction="never"
+        />
+
+</menu>

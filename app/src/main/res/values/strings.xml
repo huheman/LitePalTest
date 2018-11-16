@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">LitePalTest</string>
+    <string name="roomtips">请输入房间号</string>
+    <string name="watertips">请输入水表读数</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_home">概况</string>
+    <string name="title_analize">分析</string>
+    <string name="title_new">新建</string>
+    <string name="title_output">生成</string>
+    <string name="title_backup">备份</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="itemText_template_data">上次结算日期是%s。\n电表读数是 %d 度，用了 %d 度，合计 %.2f 元。\n水表读数是 %d 度，用了 %d 度,合计 %.2f 元。\n房租是 %.2f 元\n共 %.2f 元</string>
+</resources>

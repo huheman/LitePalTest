@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="backgroundColor">#f5f5f5</color>
+    <color name="textViewBackground">#fff</color>
+    <color name="devideLineColor">#f1f1f1</color>
+    <color name="diableViewColor">#f5faff</color>
+    <color name="deepDark">#9b9b9b</color>
+    <color name="deepDeepDark">#1d1d1d</color>
+    <color name="loeckedDark">#e6e6e6</color>
+    <color name="lightBlue">#71c6ff</color>
+    <color name="lightBlue2">#8bd0ff</color>
+    <color name="pureBlue">#0000ff</color>
+    <color name="deepDarkTranslate">#759b9b9b</color>
+    <color name="deepDarkMoreTranslate">#269b9b9b</color>
+    <color name="lightDark">#f8feff</color>
+    <color name="lightgreen">#80ff61</color>
+    <color name="lightRed">#ff6565</color>
+    <color name="lightyellow">#ff8753</color>
+</resources>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.daimajia.swipe.SwipeLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/chargemanage_swipelayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageButton
+            android:id="@+id/chargemanage_editCharge_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_editcharge"
+            android:layout_gravity="end"
+            />
+        <ImageButton
+            android:id="@+id/chargemanage_deleteCharge_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_deletecharge"
+            android:layout_gravity="end"
+            />
+        <ImageButton
+            android:id="@+id/chargemanage_detailCharge_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_message_2"
+            android:layout_gravity="end"
+            />
+    </LinearLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/chargemanage_surfaceLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <CheckBox
+            android:id="@+id/chargemanage_listView_item_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="16dp"
+            app:layout_constraintTop_toTopOf="@id/chargemanage_listView_item_titleTextView"
+            app:layout_constraintBottom_toBottomOf="@id/chargemanage_listView_item_subTextView"
+            />
+        <TextView
+            android:id="@+id/chargemanage_listView_item_titleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/deepDeepDark"
+            android:layout_marginStart="8dp"
+            android:text="电费"
+            android:textSize="@dimen/textsize"
+            android:padding="4dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toEndOf="@id/chargemanage_listView_item_checkbox"/>
+
+        <TextView
+            android:id="@+id/chargemanage_listView_item_subTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:padding="4dp"
+            android:text="3元/度，所有房间共用"
+            android:textColor="@color/deepDark"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/chargemanage_listView_item_checkbox"
+            app:layout_constraintTop_toBottomOf="@id/chargemanage_listView_item_titleTextView" />
+
+</android.support.constraint.ConstraintLayout>
+</com.daimajia.swipe.SwipeLayout>

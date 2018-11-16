@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/message_preDateTips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/message_tipsText"
+        android:layout_marginStart="16dp"
+        android:padding="4dp"
+        android:background="@drawable/predatetips_background"
+        android:visibility="gone"
+        android:text="上次记录日期：2018年10月31日"/>
+
+    <TextView
+        android:id="@+id/message_tipsText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/diableViewColor"
+        android:drawableStart="@drawable/ic_home"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:paddingStart="16dp"
+        android:text="房间号"
+        android:textColor="@color/deepDeepDark"
+        android:textSize="@dimen/textsize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/message_preDateTips" />
+
+    <EditText
+        android:id="@+id/message_editText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:focusableInTouchMode="false"
+        android:gravity="start"
+        android:inputType="number|numberDecimal"
+        android:maxLines="1"
+        android:padding="12dp"
+        android:text="206"
+        android:textColor="@color/deepDark"
+        android:textSize="@dimen/textsize"
+        app:layout_constraintBottom_toBottomOf="@id/message_tipsText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/guideline"
+        app:layout_constraintTop_toTopOf="@id/message_tipsText" />
+    <ImageView
+
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divediViewHeight"
+        android:src="@color/deepDark"
+        app:layout_constraintTop_toTopOf="@id/message_editText" />
+    <ImageView
+        android:visibility="gone"
+        android:id="@+id/message_devide"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/divediViewHeight"
+        app:layout_constraintTop_toBottomOf="@id/message_tipsText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@color/deepDark"/>
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/message_hint"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/message_tipsText"
+        android:text="请输入房间号"
+        android:padding="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="0dp"
+        app:layout_constraintGuide_percent="0.36" />
+
+
+
+</android.support.constraint.ConstraintLayout>

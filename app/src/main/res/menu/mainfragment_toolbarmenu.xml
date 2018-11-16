@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/mainfragment_toolbar_newRoom"
+        android:title="新增房间"
+        android:icon="@drawable/ic_newroom"
+        app:showAsAction="never"
+        />
+    <item
+        android:id="@+id/mainfragment_toolbar_searchroom"
+        android:title="查找房间"
+        android:icon="@drawable/ic_search"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/mainfragment_toolbar_chargemangment"
+        android:title="费用管理"
+        android:icon="@drawable/ic_chargemanagment"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/mainfragment_toolbar_note"
+        android:title="添加备注"
+        android:icon="@drawable/ic_note" />
+</menu>

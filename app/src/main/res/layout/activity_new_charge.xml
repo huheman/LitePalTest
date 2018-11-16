@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".NewChargeActivity">
+    <com.example.huhep.litepaltest.CustomToolbar
+        android:id="@+id/newcharge_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <com.example.huhep.litepaltest.CurrentMessageCollector
+        android:layout_marginTop="16dp"
+        android:id="@+id/newcharge_chargeNameCollector"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/newcharge_toolbar"
+        />
+
+    <TextView
+        android:id="@+id/newcharge_chargeTypeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        android:text="费用类型:"
+        android:textColor="@color/deepDeepDark"
+        android:textSize="@dimen/textsize"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/newcharge_chargeNameCollector"
+        app:layout_constraintEnd_toStartOf="@id/newcharge_chargeTypeRadioGroup"
+
+        android:layout_margin="16dp"/>
+
+    <RadioGroup
+        android:id="@+id/newcharge_chargeTypeRadioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@id/newcharge_chargeTypeTextView"
+        app:layout_constraintTop_toTopOf="@id/newcharge_chargeTypeTextView"
+        app:layout_constraintBottom_toBottomOf="@id/newcharge_chargeTypeTextView"
+        android:checkedButton="@id/newcharge_chargePreDegreeRadioButton"
+        >
+        <RadioButton
+            android:id="@+id/newcharge_chargePreDegreeRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/textsize"
+            android:text="按度收费"/>
+        <RadioButton
+            android:id="@+id/newcharge_chargePreMonthRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="按月收费"
+            android:textSize="@dimen/textsize"
+            android:layout_marginStart="8dp"
+            />
+    </RadioGroup>
+
+    <com.example.huhep.litepaltest.CurrentMessageCollector
+        android:id="@+id/newcharge_priceCollector"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/newcharge_chargeTypeTextView"
+        android:layout_marginTop="16dp"/>
+
+    <TextView
+        android:id="@+id/newcharge_priceUnit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/deepDark"
+        android:text="元/度"
+        android:textSize="@dimen/textsize"
+        app:layout_constraintTop_toTopOf="@id/newcharge_priceCollector"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="13dp"
+        android:layout_marginEnd="46dp"/>
+
+    <com.example.huhep.litepaltest.CurrentMessageCollector
+        android:id="@+id/newcharge_maxloopcollector"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/newcharge_priceCollector"
+        />
+
+    <Button
+        android:id="@+id/newcharge_createButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="创建费用类型"
+        style="@style/highlightButtonTheme"
+        android:textSize="@dimen/textsize"
+        android:layout_margin="16dp"
+        android:enabled="false"
+        app:layout_constraintTop_toBottomOf="@id/newcharge_maxloopcollector"/>
+
+
+
+
+</android.support.constraint.ConstraintLayout>

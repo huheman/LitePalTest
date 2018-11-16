@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/textViewBackground"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/previewdetailitem_linearLayout">
+
+    <TextView
+        android:id="@+id/previewdetailitem_roomnum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/lightBlue"
+        android:gravity="center"
+        android:padding="4dp"
+        android:text="206"
+        android:textSize="@dimen/textsize"
+        android:textColor="@color/textViewBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+
+</LinearLayout>
