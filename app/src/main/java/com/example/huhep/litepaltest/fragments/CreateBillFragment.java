@@ -39,7 +39,6 @@ import java.util.Map;
 public class CreateBillFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final String TAG = "PengPeng";
 
     private Room room;
     LinearLayout view;
@@ -175,6 +174,7 @@ public class CreateBillFragment extends Fragment {
             double lastDegree = lastBill.getToDegree();
             oldBillCollector.setPreDateTips("上次抄表日期是:" + lastWhen);
             oldBillCollector.getEditText().setText(String.valueOf(lastDegree));
+            editor.putString(Util.getSPName(room, billType) + "_pre", String.valueOf(lastDegree));
         } else {
             oldBillCollector.setPreDateTips(billType.getBillTypeName() + "还没有收费记录");
             String preMsg = sharedPreferences.getString(Util.getSPName(room, billType) + "_pre", "");

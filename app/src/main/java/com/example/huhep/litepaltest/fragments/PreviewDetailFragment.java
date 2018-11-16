@@ -44,10 +44,8 @@ public class PreviewDetailFragment extends Fragment {
     RecyclerView recyclerView;
 
     private OnCreatedViewFinishedListener onCreatedViewFinishedListener;
-    private View view;
     private Unbinder unbinder;
     private int state = 0;
-    private PreviewDetailRecyclerAdapter previewDetailRecyclerAdapter;
 
     public void setOnViewHolderClickedListener(PreviewDetailFragment.onViewHolderClickedListener onViewHolderClickedListener) {
         this.onViewHolderClickedListener = onViewHolderClickedListener;
@@ -63,7 +61,7 @@ public class PreviewDetailFragment extends Fragment {
         void onCreatedFinished(int state);
     }
 
-    public interface onViewHolderClickedListener{
+    public interface onViewHolderClickedListener {
         void onViewHolderClicked(long roomId);
     }
 
@@ -75,8 +73,6 @@ public class PreviewDetailFragment extends Fragment {
     public void setOnCreatedViewFinishedListener(OnCreatedViewFinishedListener listener) {
         this.onCreatedViewFinishedListener = listener;
     }
-
-
 
     class PreviewDetailRecyclerAdapter extends RecyclerView.Adapter<PreviewDetailRecyclerAdapter.ViewHolder> {
         private List<Room> roomList;
@@ -113,13 +109,12 @@ public class PreviewDetailFragment extends Fragment {
                 for (Map.Entry<String, List<Bill>> map : entries) {
                     List<Bill> billList = map.getValue();
                     ItemComponents itemComponents = new ItemComponents(getContext(), null);
-                    if (billList.get(0).getToDegree()!=0){
-                        itemComponents.setDuration("共计: "+Util.getTotalHowMuchOfBillList(billList)+" 元");
-                        itemComponents.setDetail("共用: "+Util.getHowDegreeOfBillList(billList)+" 度");
-                    }
-                    else{
+                    if (billList.get(0).getToDegree() != 0) {
+                        itemComponents.setDuration("共计: " + Util.getTotalHowMuchOfBillList(billList) + " 元");
+                        itemComponents.setDetail("共用: " + Util.getHowDegreeOfBillList(billList) + " 度");
+                    } else {
                         itemComponents.duration.setVisibility(View.GONE);
-                        itemComponents.setDetail("共计："+ Util.getTotalHowMuchOfBillList(billList)+" 元");
+                        itemComponents.setDetail("共计：" + Util.getTotalHowMuchOfBillList(billList) + " 元");
                     }
                     itemComponents.setTitle(map.getKey());
                     holder.linearLayout.addView(itemComponents);
@@ -127,37 +122,40 @@ public class PreviewDetailFragment extends Fragment {
                 ItemComponents itemComponents = new ItemComponents(getContext(), null);
                 itemComponents.setTitle("所有收费");
                 itemComponents.duration.setVisibility(View.GONE);
-                itemComponents.setDetail(Util.getTotalHowMuchOfBillList(PreviewFragment.billList)+"元");
+                itemComponents.setDetail(Util.getTotalHowMuchOfBillList(PreviewFragment.billList) + "元");
                 holder.linearLayout.addView(itemComponents);
             } else {
                 Room room = roomList.get(position);
-                List<Bill> totalBill=new ArrayList<>();
+                List<Bill> totalBill = new ArrayList<>();
                 holder.roomNumTextView.setText(room.getRoomNum());
                 List<BillType> billTypeList = room.getCheckedBillTypeList();
                 for (BillType billType : billTypeList) {
                     Bill bill = new Bill(room, billType);
                     if (bill.getType() == Bill.BILL_ALL_OK || bill.getType() == Bill.BILL_TOO_MUCH)
                         totalBill.add(bill);
-                    if (bill.getType()>state) state = bill.getType();
+                    if (bill.getType() > state) state = bill.getType();
                     ItemComponents itemComponent = new ItemComponents(getContext(), null);
                     itemComponent.setTitle(billType.getBillTypeName());
                     itemComponent.setDuration(bill.getDuration());
                     itemComponent.setDetail(bill.getDetail());
-                    if (billType.isChargeOnDegree()){
+                    if (billType.isChargeOnDegree()) {
                         itemComponent.setDetailColor(bill.getType());
+                    } else {
+                        if (!bill.isReadyToRent())
+                            itemComponent.duration.setVisibility(View.GONE);
                     }
                     holder.linearLayout.addView(itemComponent);
                 }
                 ItemComponents itemComponents = new ItemComponents(getContext(), null);
                 itemComponents.setTitle("合计");
                 itemComponents.duration.setVisibility(View.GONE);
-                itemComponents.setDetail(Util.getTotalHowMuchOfBillList(totalBill)+" 元");
+                itemComponents.setDetail(Util.getTotalHowMuchOfBillList(totalBill) + " 元");
                 holder.linearLayout.addView(itemComponents);
                 if (roomList.size() - 1 == position && onCreatedViewFinishedListener != null) {
                     onCreatedViewFinishedListener.onCreatedFinished(state);
                 }
                 holder.linearLayout.setOnClickListener(v -> {
-                    if (onViewHolderClickedListener!=null)
+                    if (onViewHolderClickedListener != null)
                         onViewHolderClickedListener.onViewHolderClicked(room.getId());
                 });
             }
@@ -168,24 +166,23 @@ public class PreviewDetailFragment extends Fragment {
             if (makeItTogether) return 1;
             else return roomList.size();
         }
-
     }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_preview_detail, container, false);
+        View view = inflater.inflate(R.layout.fragment_preview_detail, container, false);
         unbinder = ButterKnife.bind(this, view);
 
         boolean makeItTogether = false;
-        List<Room> roomList=null;
+        List<Room> roomList = null;
         if (roomSetId != -1) {
             roomList = LitePal.where("roomSetId=? and isOccupy=1", String.valueOf(roomSetId)).find(Room.class);
         } else {
             makeItTogether = true;
         }
-        previewDetailRecyclerAdapter = new PreviewDetailRecyclerAdapter(roomList, makeItTogether);
+        PreviewDetailRecyclerAdapter previewDetailRecyclerAdapter = new PreviewDetailRecyclerAdapter(roomList, makeItTogether);
         recyclerView.setAdapter(previewDetailRecyclerAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         return view;

@@ -41,7 +41,6 @@ public class RoomFragment extends Fragment {
     private String mParam2;
     public List<Room> roomList;
     MyRoomFragmentRecyclerAdapter adapter;
-    private static final String TAG = "PengPeng";
 
     @BindView(R.id.vpfragment_recyclerView)
     RecyclerView recyclerView;
@@ -124,7 +123,7 @@ public class RoomFragment extends Fragment {
                 viewHolder.noteTextView.setVisibility(View.GONE);
             } else {
                 viewHolder.noteTextView.setVisibility(View.VISIBLE);
-                viewHolder.noteTextView.setVisibility(View.VISIBLE);
+                viewHolder.noteTipsTextView.setVisibility(View.VISIBLE);
                 viewHolder.noteTextView.setText(room.getMemoForRoom());
             }
             if (room.isPaidOnWechat()) viewHolder.paidInWeChatTextView.setVisibility(View.VISIBLE);

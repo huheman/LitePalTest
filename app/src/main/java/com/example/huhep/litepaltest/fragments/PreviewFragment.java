@@ -4,6 +4,7 @@ package com.example.huhep.litepaltest.fragments;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -14,7 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.huhep.litepaltest.BaseActivity;
 import com.example.huhep.litepaltest.CustomToolbar;
 import com.example.huhep.litepaltest.R;
 import com.example.huhep.litepaltest.bean.Bill;
@@ -32,6 +35,7 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 
 import static com.example.huhep.litepaltest.bean.Bill.BILL_ERROR;
@@ -40,7 +44,7 @@ import static com.example.huhep.litepaltest.bean.Bill.BILL_TOO_MUCH;
 public class PreviewFragment extends Fragment {
     private List<Long> roomSetId;
     public static List<Bill> billList;
-    public static HashMap<String,List<Bill>> billOfName;
+    public static HashMap<String, List<Bill>> billOfName;
     private PreviewDetailFragment.onViewHolderClickedListener onViewHolderClickedListener;
     private Unbinder unbinder;
     private FragmentStatePagerAdapter adapter;
@@ -54,7 +58,6 @@ public class PreviewFragment extends Fragment {
     @BindView(R.id.previewmanagerfragment_tablayout)
     TabLayout tabLayout;
 
-
     public void setOnViewHolderClickedListener(PreviewDetailFragment.onViewHolderClickedListener onViewHolderClickedListener) {
         this.onViewHolderClickedListener = onViewHolderClickedListener;
     }
@@ -64,10 +67,9 @@ public class PreviewFragment extends Fragment {
     }
 
     @SuppressLint("ValidFragment")
-    public PreviewFragment(List<Long> roomsetId){
+    public PreviewFragment(List<Long> roomsetId) {
         this.roomSetId = roomsetId;
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -82,13 +84,13 @@ public class PreviewFragment extends Fragment {
     }
 
     private void setupBillList() {
-        billList=new ArrayList<>();
-        billOfName=new HashMap<>();
+        billList = new ArrayList<>();
+        billOfName = new HashMap<>();
         List<Room> roomList = LitePal.where("isOccupy=1").find(Room.class);
         for (Room room : roomList) {
             List<BillType> checkedBillTypeList = room.getCheckedBillTypeList();
             Util.sort(checkedBillTypeList);
-            for (BillType checkBillType : checkedBillTypeList){
+            for (BillType checkBillType : checkedBillTypeList) {
                 Bill bill = new Bill(room, checkBillType);
                 List<Bill> bills = billOfName.get(checkBillType.getBillTypeName());
                 if (bills == null) {
@@ -105,7 +107,7 @@ public class PreviewFragment extends Fragment {
         List<Long> list = new ArrayList<>();
         list.add(-1L);
         list.addAll(roomSetId);
-        adapter = new FragmentStatePagerAdapter(getActivity().getSupportFragmentManager()){
+        adapter = new FragmentStatePagerAdapter(getActivity().getSupportFragmentManager()) {
 
             @Override
             public int getCount() {
@@ -141,7 +143,7 @@ public class PreviewFragment extends Fragment {
             tabLayout.getTabAt(i).setCustomView(R.layout.billmanagefragment_tablayout);
             TextView textView = tabLayout.getTabAt(i).getCustomView().findViewById(R.id.tab_textView);
             String title = "总体";
-            if (i!=0) title = LitePal.find(RoomSet.class, roomSetId.get(i-1)).getRoomSetName();
+            if (i != 0) title = LitePal.find(RoomSet.class, roomSetId.get(i - 1)).getRoomSetName();
             textView.setText(title);
         }
     }
@@ -154,5 +156,24 @@ public class PreviewFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
+    }
+
+    @OnClick(R.id.previewmanagefragment_printButton)
+    public void printButtonClicked(View view){
+        beginToPrint();
+        saveBills();
+    }
+
+    private void saveBills() {
+        for (Bill bill : billList) {
+            if (bill.getType() == Bill.BILL_ALL_OK ||
+                    bill.getType() == Bill.BILL_TOO_MUCH ||
+                    bill.getType() == Bill.BILL_SET_BASEDEGREE) {
+                bill.save();
+            }
+        }
+    }
+
+    private void beginToPrint() {
     }
 }

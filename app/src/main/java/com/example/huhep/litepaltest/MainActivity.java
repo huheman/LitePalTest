@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.example.huhep.litepaltest.bean.Bill;
 import com.example.huhep.litepaltest.bean.BillType;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.bean.RoomSet;
@@ -31,8 +32,8 @@ public class MainActivity extends BaseActivity {
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = item -> {
         MainActivity activity = MainActivity.this;
-        if (item.getItemId() != R.id.navigation_newpage &&activity.billManageFragment != null) {
-                activity.billManageFragment.saveAllMessage();
+        if (item.getItemId() != R.id.navigation_newpage && activity.billManageFragment != null) {
+            activity.billManageFragment.saveAllMessage();
         }
         FragmentTransaction transaction = activity.fragmentManager.beginTransaction();
         hideFragment(transaction);
@@ -43,14 +44,14 @@ public class MainActivity extends BaseActivity {
             case R.id.navigation_newpage:
                 if (activity.billManageFragment == null) {
                     List<Room> all = LitePal.where("isOccupy=1").find(Room.class);
-                    activity.billManageFragment = BillManageFragment.newInstance(all,-1);
+                    activity.billManageFragment = BillManageFragment.newInstance(all, -1);
                     transaction.add(R.id.main_constraintLayout, activity.billManageFragment);
                 }
                 transaction.show(activity.billManageFragment).commit();
                 break;
             case R.id.navigation_output:
                 //每次点进来都应该重新生成
-                if (activity.previewFragment!=null){
+                if (activity.previewFragment != null) {
                     transaction.remove(activity.previewFragment);
                     activity.previewFragment = null;
                 }
@@ -62,7 +63,7 @@ public class MainActivity extends BaseActivity {
                 activity.previewFragment = new PreviewFragment(roomSetIdList);
                 activity.previewFragment.setOnViewHolderClickedListener(roomId -> {
                     activity.navigationView.setSelectedItemId(R.id.navigation_newpage);
-                    if (activity.billManageFragment.getViewPager()==null)
+                    if (activity.billManageFragment.getViewPager() == null)
                         activity.billManageFragment.setRoomIdToShow(roomId);
                     else
                         activity.billManageFragment.showViewPagerSelectRoom(roomId);
@@ -70,7 +71,7 @@ public class MainActivity extends BaseActivity {
                 transaction.add(R.id.main_constraintLayout, activity.previewFragment).show(activity.previewFragment).commit();
                 break;
             case R.id.navigation_analize:
-
+                LitePal.deleteAll(Bill.class);
                 break;
 
             case R.id.navigation_backup:
@@ -86,7 +87,7 @@ public class MainActivity extends BaseActivity {
     private void hideFragment(FragmentTransaction transaction) {
         if (mainFragment != null) transaction.hide(mainFragment);
         if (billManageFragment != null) transaction.hide(billManageFragment);
-        if (previewFragment!=null) transaction.hide(previewFragment);
+        if (previewFragment != null) transaction.hide(previewFragment);
     }
 
     private FragmentManager fragmentManager;
@@ -108,7 +109,6 @@ public class MainActivity extends BaseActivity {
         fragmentManager = getSupportFragmentManager();
         navigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         Util.disableShiftMode(navigationView);//使bottomnavigation不再变大缩小
-
 
         mainFragment = MainFragment.newInstance();
         mainFragment.setMainFragmentlistener(() -> {

@@ -45,6 +45,7 @@ public class Room extends LitePalSupport implements Parcelable {
     public void setRoomSet_id(long roomSet_id) {
         this.roomSetId = roomSet_id;
     }
+
     protected Room(Parcel in) {
         id = in.readLong();
         timeToLiveIn = in.readLong();
@@ -159,23 +160,26 @@ public class Room extends LitePalSupport implements Parcelable {
 
     public String getDetail() {
         StringBuilder sb = new StringBuilder();
-        if (!TextUtils.isEmpty(username)||!TextUtils.isEmpty(tel)){
-            if (!TextUtils.isEmpty(username))
-                sb.append("住户名:").append(username).append("   ");
-            if (!TextUtils.isEmpty(tel))
-                sb.append("电话：").append(tel);
-        }
+        if (!TextUtils.isEmpty(username))
+            sb.append("住户名:").append(username).append("   ");
+        if (!TextUtils.isEmpty(tel))
+            sb.append("电话：").append(tel);
 
-        List<Bill> billLasCheckOut=getBillsLastCheckOut();
+
+        List<Bill> billLasCheckOut = getBillsLastCheckOut();
         for (Bill bill : billLasCheckOut) {
-            if (sb.length()>0) sb.append("\n");
+            if (sb.length() > 0) sb.append("\n");
             BillType billType = bill.getbillType();
-            String date = Util.getDate(bill.getToDate(), "yyyy-MM-dd");
-            sb.append(billType.getBillTypeName()).append(" 上次出单日期是:").append(date).append(" 费用：").append(bill.howMuch()).append("元");
+            sb.append(billType.getBillTypeName() + ":")
+                    .append("\n" + bill.getDuration())
+                    .append("\n" + bill.getDetail())
+                    .append("\n");
         }
+        if (billLasCheckOut.size()>0)
+            sb.append("\n"+"共计:" + Util.getTotalHowMuchOfBillList(billLasCheckOut)+"\n");
 
-        if (sb.length()>0) sb.append("\n");
-        if (isOccupy){
+        if (sb.length() > 0) sb.append("\n");
+        if (isOccupy) {
             sb.append("入住日期：").append(Util.getDate(timeToLiveIn, "yyyy-MM-dd")).append("，");
             sb.append("共住了").append(getDurationOfLiveIn());
         } else {
@@ -186,17 +190,13 @@ public class Room extends LitePalSupport implements Parcelable {
     }
 
     private List<Bill> getBillsLastCheckOut() {
-        List<Bill> bills = LitePal.where("roomId=?",String.valueOf(id)).find(Bill.class);
-        LongSparseArray<Bill> billLongSparseArray = new LongSparseArray<>();
-        for (Bill bill : bills) {
-            long billType_id = bill.getBillType_id();
-            if (billLongSparseArray.get(billType_id) != null && bill.getToDate() > billLongSparseArray.get(billType_id).getToDate()) {
-                billLongSparseArray.append(billType_id, bill);
-            }
-        }
+        List<BillType> billTypeList = getCheckedBillTypeList();
+        Util.sort(billTypeList);
         List<Bill> billsToReturn = new ArrayList<>();
-        for (int i = 0; i < billLongSparseArray.size(); i++) {
-            billsToReturn.add(billLongSparseArray.valueAt(i));
+        for (BillType billType : billTypeList) {
+            Bill lastBillOf = Util.getLastBillOf(this, billType);
+            if (lastBillOf != null)
+                billsToReturn.add(lastBillOf);
         }
         return billsToReturn;
     }
@@ -221,7 +221,6 @@ public class Room extends LitePalSupport implements Parcelable {
 
     public List<BillType> getBillTypeList() {
         List<BillType> billTypeList = LitePal.where("belongTo=?", String.valueOf(id)).find(BillType.class);
-
         List<BillType> publicBillTypeList = LitePal.where("belongTo=?", "-1").find(BillType.class);
         for (BillType publicBillType : publicBillTypeList) {
             if (!publicBillType.isOneOf(billTypeList)) {
@@ -235,7 +234,7 @@ public class Room extends LitePalSupport implements Parcelable {
         List<BillType> billTypeList = getBillTypeList();
         Iterator<BillType> iterator = billTypeList.iterator();
         while (iterator.hasNext()) {
-            if (!iterator.next().isChecked()){
+            if (!iterator.next().isChecked()) {
                 iterator.remove();
             }
         }

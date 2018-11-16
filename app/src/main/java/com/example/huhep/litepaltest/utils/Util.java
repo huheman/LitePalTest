@@ -36,6 +36,7 @@ import static com.example.huhep.litepaltest.bean.Bill.BILL_TOO_MUCH;
 
 public class Util {
     private static final String TAG = "PengPeng";
+
     public static void setFullScreen(Activity activity) {
         activity.getWindow().setBackgroundDrawableResource(R.color.backgroundColor);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -71,7 +72,7 @@ public class Util {
         Object[] objects = list.toArray();
         for (int i = 0; i < objects.length; i++) {
             for (int j = i; j > 0; j--) {
-                if (comparator.compare((T)objects[j],(T)objects[j-1])<0) {
+                if (comparator.compare((T) objects[j], (T) objects[j - 1]) < 0) {
                     swap(j, j - 1, objects);
                 }
             }
@@ -79,32 +80,32 @@ public class Util {
         ListIterator<T> i = list.listIterator();
         for (Object o : objects) {
             i.next();
-            i.set((T)o);
+            i.set((T) o);
         }
     }
 
     public static void sort(@NonNull List<?> roomList) {
-        if (roomList.size()==0) return;
+        if (roomList.size() == 0) return;
 
-        if (roomList.get(0) instanceof Room){
-            sort(roomList, (o1, o2) -> ((Room)o1).getRoomNum().compareTo(((Room)o2).getRoomNum()));
-        } else if (roomList.get(0) instanceof BillType){
-            sort(roomList, (o3, o4) ->{
+        if (roomList.get(0) instanceof Room) {
+            sort(roomList, (o1, o2) -> ((Room) o1).getRoomNum().compareTo(((Room) o2).getRoomNum()));
+        } else if (roomList.get(0) instanceof BillType) {
+            sort(roomList, (o3, o4) -> {
                 BillType o1 = (BillType) o3;
                 BillType o2 = (BillType) o4;
-                if (o1.isChargeOnDegree()&&!o2.isChargeOnDegree()) {
+                if (o1.isChargeOnDegree() && !o2.isChargeOnDegree()) {
                     return 1;
                 } else if (!o1.isChargeOnDegree() && o2.isChargeOnDegree()) {
                     return -1;
                 } else {
                     return o1.getBillTypeName().compareTo(o2.getBillTypeName());
                 }
-            } );
+            });
         }
 
     }
 
-    private static void swap(int j, int i,Object[] objects) {
+    private static void swap(int j, int i, Object[] objects) {
         Object temp = objects[j];
         objects[j] = objects[i];
         objects[i] = temp;
@@ -118,7 +119,7 @@ public class Util {
         return null;
     }
 
-    public static String getDate(long time,String pattern){
+    public static String getDate(long time, String pattern) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(time);
@@ -127,7 +128,7 @@ public class Util {
 
     public static String getDate() {
         String date = getDate(System.currentTimeMillis(), "yyyy-MM-dd  HH:mm:ss");
-        return date+" : ";
+        return date + " : ";
     }
 
     public static String getSPName(Room room, BillType billType) {
@@ -137,14 +138,14 @@ public class Util {
     public static List<BillType> getAllBillTypeOf(long roomid) {
         if (roomid == -1) {
             return LitePal.where("belongTo=?", String.valueOf(roomid)).find(BillType.class);
-        }else {
+        } else {
             return LitePal.find(Room.class, roomid).getBillTypeList();
         }
     }
 
     public static SparseIntArray duration(long later, long earlier) {
-        if (later<earlier) throw new RuntimeException("计算日期间隔时，之后的数不能比之前的早");
-        SparseIntArray array=new SparseIntArray();
+        if (later < earlier) throw new RuntimeException("计算日期间隔时，之后的数不能比之前的早");
+        SparseIntArray array = new SparseIntArray();
         Calendar calendarLater = Calendar.getInstance();
         Calendar calendarEarlier = Calendar.getInstance();
         calendarLater.setTimeInMillis(later);
@@ -152,7 +153,7 @@ public class Util {
         int year = calendarLater.get(Calendar.YEAR) - calendarEarlier.get(Calendar.YEAR);
         int month = calendarLater.get(Calendar.MONTH) - calendarEarlier.get(Calendar.MONTH);
         int day = calendarLater.get(Calendar.DAY_OF_MONTH) - calendarEarlier.get(Calendar.DAY_OF_MONTH);
-        if (month<0 && year>0) {
+        if (month < 0 && year > 0) {
             month += 12;
             year -= 1;
         }
@@ -167,13 +168,13 @@ public class Util {
     }
 
     public static int howManyMonth(long later, long earlier) {
-        if (later<earlier) return -1;
+        if (later < earlier) return -1;
         SparseIntArray duration = duration(later, earlier);
         int year = duration.get(0);
         int month = duration.get(1);
         int day = duration.get(2);
-        if (year>0) month += (year * 12);
-        if (day>15) month += 1;
+        if (year > 0) month += (year * 12);
+        if (day > 15) month += 1;
         return month;
     }
 
@@ -181,13 +182,13 @@ public class Util {
         return formationDuration(duration, "年", "月", "日");
     }
 
-    public static String formationDuration(SparseIntArray duration,String yearUnit, String monthUnit, String dayUnit) {
+    public static String formationDuration(SparseIntArray duration, String yearUnit, String monthUnit, String dayUnit) {
         StringBuilder sb = new StringBuilder();
         int year = duration.get(0);
         int month = duration.get(1);
         int day = duration.get(2);
-        if (year>0) sb.append(year).append(yearUnit);
-        if (month>0) sb.append(month).append(monthUnit);
+        if (year > 0) sb.append(year).append(yearUnit);
+        if (month > 0) sb.append(month).append(monthUnit);
         sb.append(day).append(dayUnit);
         return sb.toString();
     }
@@ -200,10 +201,10 @@ public class Util {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(when);
         int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH)+1;
+        int month = calendar.get(Calendar.MONTH) + 1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-        if (day>15) month += 1;
-        if (month==13) {
+        if (day > 15) month += 1;
+        if (month == 13) {
             year++;
             month = 1;
         }
@@ -228,36 +229,40 @@ public class Util {
     public static String getNextMonty(long when) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(when);
-        calendar.add(Calendar.MONTH,1);
-        if (calendar.get(Calendar.MONTH)==12)
+        calendar.add(Calendar.MONTH, 1);
+        if (calendar.get(Calendar.MONTH) == 12)
             calendar.set(Calendar.MONTH, 0);
         return getWhen(calendar.getTimeInMillis());
     }
 
-    public static String getWhenAccurately(long when){
+    public static String getWhenAccurately(long when) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(when);
         int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH)+1;
+        int month = calendar.get(Calendar.MONTH) + 1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         return year + "年" + month + "月" + day + "日";
     }
 
-    public static Bill getLastBillOf(Room room, BillType billType) {
+    public static Bill getLastBillOf(@NonNull Room room, @NonNull BillType billType) {
+        if (room==null||billType==null){
+            Log.d(TAG, "some thing is null ");
+            return null;
+        }
         List<Bill> bills = LitePal.where("roomId=? and billTypeId=?", String.valueOf(room.getId()),
                 String.valueOf(billType.getId())).find(Bill.class);
-        if (bills.size()==0) {
+        if (bills.size() == 0) {
             List<BillType> publiBillTypeList = LitePal.where("billTypeName=? and belongTo=-1", billType.getBillTypeName())
                     .find(BillType.class);
-            if (publiBillTypeList.size()==0) return null;
+            if (publiBillTypeList.size() == 0) return null;
             BillType publiBillType = publiBillTypeList.get(0);
             bills = LitePal.where("roomId=? and billTypeId=?", String.valueOf(room.getId()),
                     String.valueOf(publiBillType.getId())).find(Bill.class);
         }
-        if (bills.size()==0) return null;
+        if (bills.size() == 0) return null;
         Bill lastBill = bills.get(0);
         for (int i = 1; i < bills.size(); i++) {
-            if (lastBill.getToDate()<bills.get(i).getToDate())
+            if (lastBill.getToDate() < bills.get(i).getToDate())
                 lastBill = bills.get(i);
         }
         return lastBill;
