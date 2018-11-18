@@ -22,7 +22,6 @@ public  class BillType extends LitePalSupport {
     private double rentPrice;
     private double priceEachDegree;
     private int isChargeOnDegree;
-    private List<Bill> billList=new ArrayList<>();
     private String billTypeName;
     private long belongTo;
     private int isChecked;
@@ -46,7 +45,6 @@ public  class BillType extends LitePalSupport {
         rentPrice = currentBillType.rentPrice;
         priceEachDegree = currentBillType.priceEachDegree;
         isChargeOnDegree = currentBillType.isChargeOnDegree;
-        billList = currentBillType.billList;
         billTypeName = currentBillType.billTypeName;
         isChecked = currentBillType.isChecked;
         loopThreshold = currentBillType.loopThreshold;
@@ -67,18 +65,6 @@ public  class BillType extends LitePalSupport {
             isChargeOnDegree = 2;
             writeInMemo("被设为按月收费类型");
         }
-    }
-
-    public List<Bill> getBillList() {
-        return billList;
-    }
-
-    public void setBillList(List<Bill> billList) {
-        this.billList = billList;
-    }
-
-    public void addBill(Bill rentBill) {
-        billList.add(rentBill);
     }
 
     public double getPriceEachDegree() {

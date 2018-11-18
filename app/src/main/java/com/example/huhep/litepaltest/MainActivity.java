@@ -59,6 +59,17 @@ public class MainActivity extends BaseActivity {
                         else
                             activity.billManageFragment.showViewPagerSelectRoom(roomId);
                     });
+                    activity.previewFragment.setOnBillsSavedListener(new PreviewFragment.OnBillsSavedListener() {
+                        @Override
+                        public void onBillSaved() {
+                            activity.navigationView.setSelectedItemId(R.id.navigation_home);
+                            activity.mainFragment.setupTheRooms();
+                            if (activity.billManageFragment != null) {
+                                activity.billManageFragment.setupView();
+                                activity.billManageFragment.setupToolBar();
+                            }
+                        }
+                    });
                     transaction.add(R.id.main_constraintLayout, activity.previewFragment);
                 } else {
                     activity.previewFragment.setupBillList();
@@ -110,6 +121,7 @@ public class MainActivity extends BaseActivity {
         mainFragment.setMainFragmentlistener(() -> {
             if (billManageFragment != null) {
                 billManageFragment.setupView();
+                billManageFragment.setupToolBar();
             }
         });
         fragmentManager.beginTransaction().add(R.id.main_constraintLayout, mainFragment).show(mainFragment).commit();

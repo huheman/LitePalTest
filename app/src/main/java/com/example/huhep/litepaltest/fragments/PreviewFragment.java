@@ -46,6 +46,16 @@ public class PreviewFragment extends Fragment {
     private PreviewDetailFragment.onViewHolderClickedListener onViewHolderClickedListener;
     private Unbinder unbinder;
 
+    public void setOnBillsSavedListener(OnBillsSavedListener onBillsSavedListener) {
+        this.onBillsSavedListener = onBillsSavedListener;
+    }
+
+    private OnBillsSavedListener onBillsSavedListener;
+
+    public interface OnBillsSavedListener{
+        void onBillSaved();
+    }
+
     @BindView(R.id.previewmanagefragment_toobar)
     CustomToolbar toolbar;
 
@@ -92,6 +102,7 @@ public class PreviewFragment extends Fragment {
             List<BillType> checkedBillTypeList = room.getCheckedBillTypeList();
             Util.sort(checkedBillTypeList);
             for (BillType checkBillType : checkedBillTypeList) {
+                //所有类型即使出错都放到list里
                 Bill bill = new Bill(room, checkBillType);
                 charge.addBill(bill);
                 List<Bill> bills = billOfName.get(checkBillType.getBillTypeName());
@@ -191,11 +202,13 @@ public class PreviewFragment extends Fragment {
     }
 
     private void saveBills() {
+        int count = 0;
         for (Bill bill : billList) {
             int type = bill.getType();
             if (type == Bill.BILL_ALL_OK ||
                     type == Bill.BILL_TOO_MUCH ||
                     type == Bill.BILL_SET_BASEDEGREE) {
+                count++;
                 bill.save();
             }
         }
@@ -213,6 +226,12 @@ public class PreviewFragment extends Fragment {
                     break;
                 }
             }
+        }
+        BaseActivity.show("保存了"+count+"条数据");
+        //删除缓存
+        BaseActivity.getSP().edit().clear().apply();
+        if (onBillsSavedListener != null) {
+            onBillsSavedListener.onBillSaved();
         }
     }
 

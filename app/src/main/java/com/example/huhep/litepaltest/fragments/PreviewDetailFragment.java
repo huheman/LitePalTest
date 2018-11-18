@@ -128,6 +128,7 @@ public class PreviewDetailFragment extends Fragment {
                 Room room = roomList.get(position);
                 holder.roomNumTextView.setText(room.getRoomNum());
                 List<BillType> billTypeList = room.getCheckedBillTypeList();
+                Util.sort(billTypeList);
                 for (BillType billType : billTypeList) {
                     Bill bill = new Bill(room, billType);
                     if (bill.getType() == Bill.BILL_ALL_OK || bill.getType() == Bill.BILL_TOO_MUCH)

@@ -169,7 +169,7 @@ public class Bill extends LitePalSupport {
                     String normalDetail = getNormalDetail();
                     return normalDetail + "\n" + "数据与之前的差距很大，请仔细确认";
                 default:
-                    return "未知错误";
+                    return "还没设置读数，\n请前往“新建”标签设置读数";
             }
         } else {
             int month = Util.howManyMonth(toDate, fromDate);
@@ -234,6 +234,6 @@ public class Bill extends LitePalSupport {
         } else {
             showDegree = (billType.getLoopThreshold() + 1) + " - " + fromDegreeFormat + " + " + toDegreeFormat + " = " + howMuchDegreeFormat + "度";
         }
-        return showDegree + "\n" + howMuchDegreeFormat + " * " + priceEachDegreeFormat + " = " + howMuchFormat + " 元";
+        return "数量: "+showDegree + "\n" +"金额: "+ howMuchDegreeFormat + " * " + priceEachDegreeFormat + " = " + howMuchFormat + " 元";
     }
 }

@@ -94,6 +94,15 @@ public class BillManageFragment extends Fragment {
     }
 
     public void setupView(@NonNull List<Room> roomListFromOut) {
+        //每次刷新前都检查下当前时间是否为所在月份，不在则把之前的数据清零
+        SharedPreferences sp = BaseActivity.getSP();
+        String whenFromSP = sp.getString(BaseActivity.WHEN_KEY_FOR_SHP, "");
+        if (!whenFromSP.equalsIgnoreCase(Util.getWhen())){
+            SharedPreferences.Editor editor = sp.edit();
+            editor.clear();
+            editor.putString(BaseActivity.WHEN_KEY_FOR_SHP, Util.getWhen());
+            editor.apply();
+        }
         roomList = roomListFromOut;
         Util.sort(roomList);
         if (roomList.size()==0) {
@@ -101,8 +110,8 @@ public class BillManageFragment extends Fragment {
             noRoomTextView.setVisibility(View.VISIBLE);
             return;
         }else {
-            coordinatorLayout.setVisibility(View.VISIBLE);
             noRoomTextView.setVisibility(View.GONE);
+            coordinatorLayout.setVisibility(View.VISIBLE);
         }
         if (roomList.size()==1) tabLayout.setVisibility(View.GONE);
         else tabLayout.setVisibility(View.VISIBLE);
@@ -144,8 +153,8 @@ public class BillManageFragment extends Fragment {
                 return roomList.get(position).getRoomNum();
             }
         };
-        tabLayout.setupWithViewPager(viewPager);
         viewPager.setAdapter(adapter);
+        tabLayout.setupWithViewPager(viewPager);
         for (int i = 0; i < tabLayout.getTabCount(); i++) {
             tabLayout.getTabAt(i).setCustomView(R.layout.billmanagefragment_tablayout);
             TextView textView =  tabLayout.getTabAt(i).getCustomView().findViewById(R.id.tab_textView);
@@ -188,7 +197,8 @@ public class BillManageFragment extends Fragment {
         }
     }
 
-    private void setupToolBar() {
+    public void setupToolBar() {
+        toolbar.getToolbar().getMenu().clear();
         if (roomList.size()>1)
             toolbar.getToolbar().getMenu().add("查找").setIcon(R.drawable.ic_search).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         toolbar.getToolbar().inflateMenu(R.menu.toobarmenu_createbillfragment);

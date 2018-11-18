@@ -42,8 +42,8 @@ public class CreateBillFragment extends Fragment {
 
     private Room room;
     LinearLayout view;
-    private SharedPreferences.Editor editor;
-    private SharedPreferences sharedPreferences;
+    private static SharedPreferences.Editor editor;
+    private static SharedPreferences sharedPreferences;
     private SparseIntArray mapForState;
     public static final int STATE_NOTFINISH = 0;
     public static final int STATE_FINISH = 10;
@@ -68,8 +68,10 @@ public class CreateBillFragment extends Fragment {
     public static CreateBillFragment newInstance(Room room) {
         CreateBillFragment fragment = new CreateBillFragment();
         fragment.room = room;
-        fragment.sharedPreferences = BaseActivity.getSP();
-        fragment.editor = fragment.sharedPreferences.edit();
+        if (sharedPreferences==null)
+            sharedPreferences = BaseActivity.getSP();
+        if (editor==null)
+            editor = fragment.sharedPreferences.edit();
         return fragment;
     }
 
@@ -282,8 +284,6 @@ public class CreateBillFragment extends Fragment {
                         currentMessageCollector.appendHint(hintMessage);
                         currentMessageCollector.getEditText().setTextColor(getContext().getResources().getColor(R.color.deepDeepDark));
                     }
-
-
                 }
                 tellTheManageState();
                 editor.putString(Util.getSPName(room, billType), s);

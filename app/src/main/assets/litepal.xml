@@ -1,6 +1,6 @@
 <litepal>
     <dbname value="demo"/>
-    <version value="54"/>
+    <version value="56"/>
     <list>
         <mapping class="com.example.huhep.litepaltest.bean.Bill"/>
         <mapping class="com.example.huhep.litepaltest.bean.Room"/>

@@ -13,7 +13,15 @@ public class Charge extends LitePalSupport {
     private long createDate;
     private long roomId;
     private List<Bill> billList;
+    private String passWord;
 
+    public String getPassWord() {
+        return passWord;
+    }
+
+    public void setPassWord(String passWord) {
+        this.passWord = passWord;
+    }
 
     public long getCreateDate() {
         return createDate;

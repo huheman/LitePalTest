@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -195,7 +196,10 @@ public class ChargeManageActivity extends BaseActivity {
     public void SaveTheCheckedState() {
         for (int i = 0; i < billTypeList.size(); i++) {
             boolean checked = ((MyRecyclerViewAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(i)).isChecked();
+
             if (stateStore==null || stateStore.indexOfKey(i)<0 || checked==stateStore.get(i) ) continue;
+            if (stateStore!=null)
+                Log.d(TAG, " check: "+checked);
             BillType billType = billTypeList.get(i);
             if (roomIdBelongTo!=-1 && billType.getBelongTo()==-1)
                 saveAsNewPrivateBillType(checked,billType);
@@ -207,6 +211,7 @@ public class ChargeManageActivity extends BaseActivity {
         BillType newPrivateBillType = new BillType(currentBillType);
         newPrivateBillType.setBelongTo(roomIdBelongTo);
         newPrivateBillType.setChecked(checked);
+        Log.d(TAG, "checked to set: "+checked);
         newPrivateBillType.save();
     }
 
