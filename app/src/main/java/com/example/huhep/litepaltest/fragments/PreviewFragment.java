@@ -1,27 +1,26 @@
 package com.example.huhep.litepaltest.fragments;
 
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
+import android.support.v7.app.AlertDialog;
+import android.util.LongSparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.huhep.litepaltest.BaseActivity;
 import com.example.huhep.litepaltest.CustomToolbar;
 import com.example.huhep.litepaltest.R;
 import com.example.huhep.litepaltest.bean.Bill;
 import com.example.huhep.litepaltest.bean.BillType;
+import com.example.huhep.litepaltest.bean.Charge;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.bean.RoomSet;
 import com.example.huhep.litepaltest.utils.Util;
@@ -31,7 +30,6 @@ import org.litepal.LitePal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,15 +40,17 @@ import static com.example.huhep.litepaltest.bean.Bill.BILL_ERROR;
 import static com.example.huhep.litepaltest.bean.Bill.BILL_TOO_MUCH;
 
 public class PreviewFragment extends Fragment {
-    private List<Long> roomSetId;
-    public static List<Bill> billList;
-    public static HashMap<String, List<Bill>> billOfName;
+    public static LongSparseArray<Charge> chargeMap;    //roomid对应charge
+    public static List<Bill> billList; //所有的bill
+    public static HashMap<String, List<Bill>> billOfName;   //总体那里的bill
     private PreviewDetailFragment.onViewHolderClickedListener onViewHolderClickedListener;
     private Unbinder unbinder;
-    private FragmentStatePagerAdapter adapter;
 
     @BindView(R.id.previewmanagefragment_toobar)
     CustomToolbar toolbar;
+
+    @BindView(R.id.previewmanagefragment_noRoomSetTextView)
+    TextView noRoomTextView;
 
     @BindView(R.id.previewmanagefragment_viewPager)
     ViewPager viewPager;
@@ -58,17 +58,14 @@ public class PreviewFragment extends Fragment {
     @BindView(R.id.previewmanagerfragment_tablayout)
     TabLayout tabLayout;
 
+    @BindView(R.id.previewmanagerfragment_coordLayout)
+    CoordinatorLayout coordinatorLayout;
     public void setOnViewHolderClickedListener(PreviewDetailFragment.onViewHolderClickedListener onViewHolderClickedListener) {
         this.onViewHolderClickedListener = onViewHolderClickedListener;
     }
 
     public PreviewFragment() {
         // Required empty public constructor
-    }
-
-    @SuppressLint("ValidFragment")
-    public PreviewFragment(List<Long> roomsetId) {
-        this.roomSetId = roomsetId;
     }
 
     @Override
@@ -83,15 +80,20 @@ public class PreviewFragment extends Fragment {
         return view;
     }
 
-    private void setupBillList() {
+    public void setupBillList() {
         billList = new ArrayList<>();
         billOfName = new HashMap<>();
+        chargeMap = new LongSparseArray<>();
+        //如果是多种类型，则新建一个Map<"组名",Map<"费用名,List<Bill>>>的map,如果room属于组名里面的，则把组名对应的Map.get("费用名")的bill加上这个。
         List<Room> roomList = LitePal.where("isOccupy=1").find(Room.class);
         for (Room room : roomList) {
+            Charge charge = new Charge(room);
+            chargeMap.put(room.getId(),charge);
             List<BillType> checkedBillTypeList = room.getCheckedBillTypeList();
             Util.sort(checkedBillTypeList);
             for (BillType checkBillType : checkedBillTypeList) {
                 Bill bill = new Bill(room, checkBillType);
+                charge.addBill(bill);
                 List<Bill> bills = billOfName.get(checkBillType.getBillTypeName());
                 if (bills == null) {
                     bills = new ArrayList<>();
@@ -103,11 +105,23 @@ public class PreviewFragment extends Fragment {
         }
     }
 
-    private void setupView() {
+    public void setupView() {
+        List<RoomSet> roomSetList = LitePal.findAll(RoomSet.class);
+        if (roomSetList.size()==0){
+            coordinatorLayout.setVisibility(View.GONE);
+            noRoomTextView.setVisibility(View.VISIBLE);
+            return;
+        }else {
+            noRoomTextView.setVisibility(View.GONE);
+            coordinatorLayout.setVisibility(View.VISIBLE);
+        }
+        Util.sort(roomSetList);
         List<Long> list = new ArrayList<>();
         list.add(-1L);
-        list.addAll(roomSetId);
-        adapter = new FragmentStatePagerAdapter(getActivity().getSupportFragmentManager()) {
+        for (RoomSet roomSet : roomSetList)
+            list.add(roomSet.getId());
+
+        FragmentStatePagerAdapter adapter = new FragmentStatePagerAdapter(getActivity().getSupportFragmentManager()) {
 
             @Override
             public int getCount() {
@@ -142,8 +156,8 @@ public class PreviewFragment extends Fragment {
         for (int i = 0; i < tabLayout.getTabCount(); i++) {
             tabLayout.getTabAt(i).setCustomView(R.layout.billmanagefragment_tablayout);
             TextView textView = tabLayout.getTabAt(i).getCustomView().findViewById(R.id.tab_textView);
-            String title = "总体";
-            if (i != 0) title = LitePal.find(RoomSet.class, roomSetId.get(i - 1)).getRoomSetName();
+            String title = "自定义";
+            if (list.get(i)!=-1) title = LitePal.find(RoomSet.class, list.get(i)).getRoomSetName();
             textView.setText(title);
         }
     }
@@ -160,16 +174,44 @@ public class PreviewFragment extends Fragment {
 
     @OnClick(R.id.previewmanagefragment_printButton)
     public void printButtonClicked(View view){
-        beginToPrint();
-        saveBills();
+        if (chargeMap.size()==0){
+            BaseActivity.show("没有数据，请先新建房间和收费项目");
+            return;
+        }
+        new AlertDialog.Builder(getContext()).setCancelable(false)
+                .setTitle("即将打印")
+                .setMessage("请把打印机数据线与手机连接，再进行打印")
+                .setPositiveButton("确认", (dialog, which) -> {
+                    beginToPrint();
+                    saveBills();
+                })
+                .setNegativeButton("取消", null)
+                .show();
+
     }
 
     private void saveBills() {
         for (Bill bill : billList) {
-            if (bill.getType() == Bill.BILL_ALL_OK ||
-                    bill.getType() == Bill.BILL_TOO_MUCH ||
-                    bill.getType() == Bill.BILL_SET_BASEDEGREE) {
+            int type = bill.getType();
+            if (type == Bill.BILL_ALL_OK ||
+                    type == Bill.BILL_TOO_MUCH ||
+                    type == Bill.BILL_SET_BASEDEGREE) {
                 bill.save();
+            }
+        }
+        List<Room> roomList = LitePal.where("isOccupy=1").find(Room.class);
+        for (Room room : roomList) {
+            Charge charge = chargeMap.get(room.getId());
+            //至少有一条有效账单才保存
+            List<Bill> billList = charge.getBillList();
+            for (Bill billOfCharge : billList) {
+                int type = billOfCharge.getType();
+                if (type == Bill.BILL_ALL_OK ||
+                        type == Bill.BILL_TOO_MUCH ||
+                        type == Bill.BILL_SET_BASEDEGREE) {
+                    charge.save();
+                    break;
+                }
             }
         }
     }

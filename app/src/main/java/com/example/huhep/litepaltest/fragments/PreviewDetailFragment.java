@@ -126,13 +126,11 @@ public class PreviewDetailFragment extends Fragment {
                 holder.linearLayout.addView(itemComponents);
             } else {
                 Room room = roomList.get(position);
-                List<Bill> totalBill = new ArrayList<>();
                 holder.roomNumTextView.setText(room.getRoomNum());
                 List<BillType> billTypeList = room.getCheckedBillTypeList();
                 for (BillType billType : billTypeList) {
                     Bill bill = new Bill(room, billType);
                     if (bill.getType() == Bill.BILL_ALL_OK || bill.getType() == Bill.BILL_TOO_MUCH)
-                        totalBill.add(bill);
                     if (bill.getType() > state) state = bill.getType();
                     ItemComponents itemComponent = new ItemComponents(getContext(), null);
                     itemComponent.setTitle(billType.getBillTypeName());
@@ -149,7 +147,7 @@ public class PreviewDetailFragment extends Fragment {
                 ItemComponents itemComponents = new ItemComponents(getContext(), null);
                 itemComponents.setTitle("合计");
                 itemComponents.duration.setVisibility(View.GONE);
-                itemComponents.setDetail(Util.getTotalHowMuchOfBillList(totalBill) + " 元");
+                itemComponents.setDetail(Util.getTotalHowMuchOfBillList(PreviewFragment.chargeMap.get(room.getId()).getBillList()) + " 元");
                 holder.linearLayout.addView(itemComponents);
                 if (roomList.size() - 1 == position && onCreatedViewFinishedListener != null) {
                     onCreatedViewFinishedListener.onCreatedFinished(state);

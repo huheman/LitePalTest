@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -31,6 +33,8 @@ import com.example.huhep.litepaltest.CustomToolbar;
 import com.example.huhep.litepaltest.R;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.utils.Util;
+
+import org.litepal.LitePal;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -58,7 +62,11 @@ public class BillManageFragment extends Fragment {
     TabLayout tabLayout;
     @BindView(R.id.managebillfragment_viewpager)
     ViewPager viewPager;
+    @BindView(R.id.managebillfragment_coordainationlayout)
+    CoordinatorLayout coordinatorLayout;
 
+    @BindView(R.id.managebillfragment_noRoomTextView)
+    TextView noRoomTextView;
 
     private List<Room> roomList;
     private Unbinder bind;
@@ -70,37 +78,32 @@ public class BillManageFragment extends Fragment {
     public BillManageFragment() {
     }
 
-    public static BillManageFragment newInstance(List<Room> roomList,long roomIdToShow) {
-        BillManageFragment billManageFragment = new BillManageFragment();
-        Util.sort(roomList);
-        billManageFragment.roomList = roomList;
-        billManageFragment.roomIdToShow = roomIdToShow;
-        //更新shareperference
-        SharedPreferences.Editor editor = BaseActivity.getSP().edit();
-        String whenfromSP = BaseActivity.getSP().getString(WHEN_KEY_FOR_SHP, "");
-        if (!Util.getWhen().equals(whenfromSP)){
-            editor.clear();
-            editor.putString(WHEN_KEY_FOR_SHP, Util.getWhen());
-            editor.apply();
-        }
-        return billManageFragment;
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_bill_manage, container, false);
         bind = ButterKnife.bind(this, view);
-        if (roomList.size()==0) {
-            return ifEmpty();
-        }
-        setupToolBar();
         setupView();
+        setupToolBar();
         return view;
     }
 
-    private void setupView() {
+    public void setupView() {
+        setupView(LitePal.findAll(Room.class));
+    }
+
+    public void setupView(@NonNull List<Room> roomListFromOut) {
+        roomList = roomListFromOut;
+        Util.sort(roomList);
+        if (roomList.size()==0) {
+            coordinatorLayout.setVisibility(View.GONE);
+            noRoomTextView.setVisibility(View.VISIBLE);
+            return;
+        }else {
+            coordinatorLayout.setVisibility(View.VISIBLE);
+            noRoomTextView.setVisibility(View.GONE);
+        }
         if (roomList.size()==1) tabLayout.setVisibility(View.GONE);
         else tabLayout.setVisibility(View.VISIBLE);
         fragmentList = getFragments();
@@ -143,8 +146,7 @@ public class BillManageFragment extends Fragment {
         };
         tabLayout.setupWithViewPager(viewPager);
         viewPager.setAdapter(adapter);
-        int tabCount = tabLayout.getTabCount();
-        for (int i = 0; i < tabCount; i++) {
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
             tabLayout.getTabAt(i).setCustomView(R.layout.billmanagefragment_tablayout);
             TextView textView =  tabLayout.getTabAt(i).getCustomView().findViewById(R.id.tab_textView);
             textView.setText(adapter.getPageTitle(i));
@@ -158,13 +160,11 @@ public class BillManageFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (roomIdToShow!=-1){
-            showViewPagerSelectRoom(roomIdToShow);
-        }
+        showViewPagerSelectRoom(roomIdToShow);
+
     }
 
     public void showViewPagerSelectRoom(long roomIdToShow) {
-        if (roomIdToShow==-1) return;
         for (int i = 0; i < roomList.size(); i++) {
             if (roomList.get(i).getId()==roomIdToShow){
                 viewPager.setCurrentItem(i);
@@ -198,6 +198,10 @@ public class BillManageFragment extends Fragment {
         toolbar.getToolbar().setOnMenuItemClickListener(item -> {
             switch (item.getTitle().toString()) {
                 case "编辑费用类型":
+                    if (roomList==null||roomList.size()==0){
+                        BaseActivity.show("请先添加房间");
+                        break;
+                    }
                     long id = roomList.get(viewPager.getCurrentItem()).getId();
                     Intent intent = new Intent(getContext(), ChargeManageActivity.class);
                     intent.putExtra(BaseActivity.ROOM_ID, id);
@@ -251,19 +255,6 @@ public class BillManageFragment extends Fragment {
         super.onDestroyView();
         bind.unbind();
     }
-
-    private View ifEmpty() {
-        LinearLayout linearLayout = new LinearLayout(getContext());
-        linearLayout.setBackgroundResource(R.color.backgroundColor);
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-        TextView textView = new TextView(getActivity());
-        textView.setText("找不到房间");
-        textView.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
-        textView.setGravity(Gravity.CENTER);
-        linearLayout.addView(textView);
-        return linearLayout;
-    }
-
 
     public ViewPager getViewPager() {
         return viewPager;

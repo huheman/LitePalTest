@@ -236,19 +236,12 @@ public class Util {
     }
 
     public static String getWhenAccurately(long when) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(when);
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        return year + "年" + month + "月" + day + "日";
+        return getDate(when,"yyyy年MM月dd日");
     }
 
     public static Bill getLastBillOf(@NonNull Room room, @NonNull BillType billType) {
-        if (room==null||billType==null){
-            Log.d(TAG, "some thing is null ");
-            return null;
-        }
+        if (room == null || billType == null)   return null;
+
         List<Bill> bills = LitePal.where("roomId=? and billTypeId=?", String.valueOf(room.getId()),
                 String.valueOf(billType.getId())).find(Bill.class);
         if (bills.size() == 0) {

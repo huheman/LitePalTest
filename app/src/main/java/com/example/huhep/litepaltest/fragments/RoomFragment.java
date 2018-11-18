@@ -22,6 +22,7 @@ import android.widget.TextView;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.example.huhep.litepaltest.BaseActivity;
 import com.example.huhep.litepaltest.R;
+import com.example.huhep.litepaltest.bean.Charge;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.utils.Util;
 
@@ -71,6 +72,9 @@ public class RoomFragment extends Fragment {
         class ViewHolder extends RecyclerView.ViewHolder{
             @BindView(R.id.roomitem_paidinwechatTextView)
             TextView paidInWeChatTextView;
+
+            @BindView(R.id.roomitem_timeTextView)
+            TextView timeTextView;
 
             @BindView(R.id.item_roomNameTextView)
             TextView roomNumTextView;
@@ -129,6 +133,12 @@ public class RoomFragment extends Fragment {
             if (room.isPaidOnWechat()) viewHolder.paidInWeChatTextView.setVisibility(View.VISIBLE);
             else viewHolder.paidInWeChatTextView.setVisibility(View.GONE);
             viewHolder.detailTextView.setText(room.getDetail());
+            Charge lastCharge = room.getLastCharge();
+            if (lastCharge != null) {
+                viewHolder.timeTextView.setText(Util.getWhen(lastCharge.getCreateDate()));
+            } else {
+                viewHolder.timeTextView.setText("未开过单");
+            }
             viewHolder.itemView.setOnCreateContextMenuListener((menu, v, menuInfo) -> {
                 if (!room.isPaidOnWechat()) menu.add("已经微信支付了");
                 else menu.add("取消微信支付状态");

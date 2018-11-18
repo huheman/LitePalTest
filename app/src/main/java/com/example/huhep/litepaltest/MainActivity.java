@@ -28,7 +28,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity {
-
+    private static final String TAG = "PengPeng";
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = item -> {
         MainActivity activity = MainActivity.this;
@@ -43,32 +43,28 @@ public class MainActivity extends BaseActivity {
                 break;
             case R.id.navigation_newpage:
                 if (activity.billManageFragment == null) {
-                    List<Room> all = LitePal.where("isOccupy=1").find(Room.class);
-                    activity.billManageFragment = BillManageFragment.newInstance(all, -1);
+                    activity.billManageFragment = new BillManageFragment();
                     transaction.add(R.id.main_constraintLayout, activity.billManageFragment);
                 }
                 transaction.show(activity.billManageFragment).commit();
                 break;
             case R.id.navigation_output:
                 //每次点进来都应该重新生成
-                if (activity.previewFragment != null) {
-                    transaction.remove(activity.previewFragment);
-                    activity.previewFragment = null;
+                if (activity.previewFragment == null) {
+                    activity.previewFragment = new PreviewFragment();
+                    activity.previewFragment.setOnViewHolderClickedListener(roomId -> {
+                        activity.navigationView.setSelectedItemId(R.id.navigation_newpage);
+                        if (activity.billManageFragment.getViewPager() == null)
+                            activity.billManageFragment.setRoomIdToShow(roomId);
+                        else
+                            activity.billManageFragment.showViewPagerSelectRoom(roomId);
+                    });
+                    transaction.add(R.id.main_constraintLayout, activity.previewFragment);
+                } else {
+                    activity.previewFragment.setupBillList();
+                    activity.previewFragment.setupView();
                 }
-                List<RoomSet> roomSetList = LitePal.findAll(RoomSet.class);
-                Util.sort(roomSetList);
-                List<Long> roomSetIdList = new ArrayList<>();
-                for (RoomSet roomSet : roomSetList)
-                    roomSetIdList.add(roomSet.getId());
-                activity.previewFragment = new PreviewFragment(roomSetIdList);
-                activity.previewFragment.setOnViewHolderClickedListener(roomId -> {
-                    activity.navigationView.setSelectedItemId(R.id.navigation_newpage);
-                    if (activity.billManageFragment.getViewPager() == null)
-                        activity.billManageFragment.setRoomIdToShow(roomId);
-                    else
-                        activity.billManageFragment.showViewPagerSelectRoom(roomId);
-                });
-                transaction.add(R.id.main_constraintLayout, activity.previewFragment).show(activity.previewFragment).commit();
+                transaction.show(activity.previewFragment).commit();
                 break;
             case R.id.navigation_analize:
                 LitePal.deleteAll(Bill.class);
@@ -113,8 +109,7 @@ public class MainActivity extends BaseActivity {
         mainFragment = MainFragment.newInstance();
         mainFragment.setMainFragmentlistener(() -> {
             if (billManageFragment != null) {
-                getSupportFragmentManager().beginTransaction().remove(billManageFragment).commit();
-                billManageFragment = null;
+                billManageFragment.setupView();
             }
         });
         fragmentManager.beginTransaction().add(R.id.main_constraintLayout, mainFragment).show(mainFragment).commit();

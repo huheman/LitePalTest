@@ -77,7 +77,6 @@ public class NewRoomActivity extends BaseActivity {
     private boolean isOccupy = true;
     private boolean spinnerIsNull = false;
     long roomId;
-    private static final String TAG = "PengPeng";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -248,7 +247,6 @@ public class NewRoomActivity extends BaseActivity {
         else room.setTimeToMoveOut(System.currentTimeMillis());
 
         if (room.save()) {
-            Log.d(TAG, "newButtonClicked: ");
             BaseActivity.show("房间创建/修改成功");
         } else {
             BaseActivity.show("房间创建失败，可能是有同名房间");

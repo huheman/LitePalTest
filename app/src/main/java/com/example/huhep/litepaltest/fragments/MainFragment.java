@@ -3,6 +3,7 @@ package com.example.huhep.litepaltest.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.huhep.litepaltest.BaseActivity;
 import com.example.huhep.litepaltest.ChargeManageActivity;
@@ -53,6 +55,12 @@ public class MainFragment extends Fragment {
     private MainFrgmentListener mainFragmentlistener;
     @BindView(R.id.mainfragment_memolistview)
     ListView memoListView;
+
+    @BindView(R.id.mainfragment_noRoomTextView)
+    TextView noRoomTextView;
+
+    @BindView(R.id.mainfragment_coordinLayout)
+    CoordinatorLayout coordinatorLayout;
 
     @BindView(R.id.mainfragment_tabLayout)
     TabLayout tabLayout;
@@ -160,6 +168,13 @@ public class MainFragment extends Fragment {
         List<String> titles=new ArrayList<>();
         if (roomSets.size()<=1) tabLayout.setVisibility(View.GONE);
         else tabLayout.setVisibility(View.VISIBLE);
+        if (roomSets.size()==0) {
+            coordinatorLayout.setVisibility(View.GONE);
+            noRoomTextView.setVisibility(View.VISIBLE);
+        }else {
+            coordinatorLayout.setVisibility(View.VISIBLE);
+            noRoomTextView.setVisibility(View.GONE);
+        }
         for (int i = 0; i < roomSets.size(); i++) {
             RoomSet roomSet = roomSets.get(i);
             titles.add(roomSet.getRoomSetName());

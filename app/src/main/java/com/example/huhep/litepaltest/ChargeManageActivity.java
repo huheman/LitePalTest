@@ -212,16 +212,11 @@ public class ChargeManageActivity extends BaseActivity {
 
     private void updateCurrentBillType(boolean checked, BillType currentBillType) {
         currentBillType.setChecked(checked);
-        if (currentBillType.isChecked()!=checked) {
-            currentBillType.setToDefault("isChecked");
-        }
         currentBillType.save();
         if (currentBillType.isPublic()) {
             List<BillType> privateBillTypeList = LitePal.where("billTypeName=? and id!=?", currentBillType.getBillTypeName(), String.valueOf(currentBillType.getId())).find(BillType.class);
             for (BillType privateBillType : privateBillTypeList) {
                 privateBillType.setChecked(checked);
-                if (privateBillType.isChecked()!=checked)
-                    privateBillType.setToDefault("isChecked");
                 privateBillType.save();
             }
         }

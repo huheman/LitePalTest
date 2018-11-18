@@ -74,7 +74,6 @@ public class DetailActivity extends BaseActivity {
 
     @BindView(R.id.main_roomButtonsLayout)
     ConstraintLayout roomControllingButtons;
-    private static final String TAG = "PengPeng";
     private MessageCollector currentCollector;
 
     protected List<MessageCollector> messageCollectorList=new ArrayList<>();
@@ -142,7 +141,6 @@ public class DetailActivity extends BaseActivity {
         Util.setFullScreen(this);
         initMemoEditText();
         if (savedInstanceState != null) {
-            Log.d(TAG, "onCreate: ");
             memoEditText.setText(savedInstanceState.getString("key"));
         }
 
@@ -211,20 +209,17 @@ public class DetailActivity extends BaseActivity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        Log.d(TAG, "onRestoreInstanceState: ");
         memoEditText.setText(savedInstanceState.getString("key"));
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy: ");
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(TAG, "onSaveInstanceState: ");
         outState.putString("key", memoEditText.getText().toString());
     }
 }

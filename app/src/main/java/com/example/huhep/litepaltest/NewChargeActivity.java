@@ -23,7 +23,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class NewChargeActivity extends BaseActivity {
-    private static final String TAG = "PengPeng";
     @BindView(R.id.newcharge_toolbar)
     CustomToolbar toolbar;
 

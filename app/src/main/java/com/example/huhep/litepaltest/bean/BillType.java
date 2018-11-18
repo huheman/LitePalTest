@@ -21,11 +21,11 @@ public  class BillType extends LitePalSupport {
     private long id;
     private double rentPrice;
     private double priceEachDegree;
-    private boolean isChargeOnDegree;
+    private int isChargeOnDegree;
     private List<Bill> billList=new ArrayList<>();
     private String billTypeName;
-    private long belongTo=-1;
-    private boolean isChecked=true;
+    private long belongTo;
+    private int isChecked;
     private String memoForBillType="";
     private int loopThreshold;
 
@@ -53,15 +53,20 @@ public  class BillType extends LitePalSupport {
     }
 
     public boolean isChargeOnDegree() {
-        return isChargeOnDegree;
+        return isChargeOnDegree==1;
     }
 
     public void setChargeOnDegree(boolean chargeOnDegree) {
-        if (this.isChargeOnDegree==chargeOnDegree) return;
-        if (chargeOnDegree) writeInMemo("被设为按度数收费类型");
+        if (isChargeOnDegree()==chargeOnDegree) return;
+        if (chargeOnDegree){
+            isChargeOnDegree = 1;
+            writeInMemo("被设为按度数收费类型");
+        }
 
-        else    writeInMemo("被设为按月收费类型");
-        isChargeOnDegree = chargeOnDegree;
+        else {
+            isChargeOnDegree = 2;
+            writeInMemo("被设为按月收费类型");
+        }
     }
 
     public List<Bill> getBillList() {
@@ -89,6 +94,9 @@ public  class BillType extends LitePalSupport {
 
     public BillType() {
         writeInMemo("新建类型");
+        belongTo = -1;
+        isChecked = 1;
+
     }
     public double getRentPrice() {
         return rentPrice;
@@ -117,7 +125,7 @@ public  class BillType extends LitePalSupport {
     }
 
     public boolean isChecked() {
-        return isChecked;
+        return isChecked==1;
     }
 
     public boolean isPublic() {
@@ -125,10 +133,15 @@ public  class BillType extends LitePalSupport {
     }
 
     public void setChecked(boolean checked) {
-        if (this.isChecked==checked) return;
-        if (checked) writeInMemo("被设为启用状态");
-        else writeInMemo("被设为禁用状态");
-        isChecked = checked;
+        if (isChecked()==checked) return;
+        if (checked){
+            isChecked = 1;
+            writeInMemo("被设为启用状态");
+        }
+        else{
+            isChecked = 2;
+            writeInMemo("被设为禁用状态");
+        }
     }
 
     private void writeInMemo(String string) {
@@ -181,7 +194,7 @@ public  class BillType extends LitePalSupport {
 
     public String getSubscrip() {
         String subscrip;
-        if (isChargeOnDegree) {
+        if (isChargeOnDegree()) {
             subscrip = priceEachDegree + "元/度,";
             if (loopThreshold!=0)
                 subscrip += "最大读数是" + loopThreshold+"度,";

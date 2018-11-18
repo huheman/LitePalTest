@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Room extends LitePalSupport implements Parcelable {
+    private static final String TAG = "PengPeng";
     private long id;
     private long timeToLiveIn;
     private long timeToMoveOut;
@@ -29,17 +30,20 @@ public class Room extends LitePalSupport implements Parcelable {
     private String memoForRoom;
     private String username;
     private String tel;
-    private boolean isOccupy;
+    private int isOccupy;
     private long roomSetId;
     private double deposit;
-    private boolean paidOnWechat;
+    private int paidOnWechat;
 
     public boolean isPaidOnWechat() {
-        return paidOnWechat;
+        return paidOnWechat == 1;
     }
 
     public void setPaidOnWechat(boolean paidOnWechat) {
-        this.paidOnWechat = paidOnWechat;
+        if (paidOnWechat)
+            this.paidOnWechat = 1;
+        else
+            this.paidOnWechat = 2;
     }
 
     public void setRoomSet_id(long roomSet_id) {
@@ -54,7 +58,7 @@ public class Room extends LitePalSupport implements Parcelable {
         memoForRoom = in.readString();
         username = in.readString();
         tel = in.readString();
-        isOccupy = in.readByte() != 0;
+        isOccupy = in.readInt() ;
         roomSetId = in.readLong();
         deposit = in.readDouble();
     }
@@ -68,7 +72,7 @@ public class Room extends LitePalSupport implements Parcelable {
         dest.writeString(memoForRoom);
         dest.writeString(username);
         dest.writeString(tel);
-        dest.writeByte((byte) (isOccupy ? 1 : 0));
+        dest.writeInt(isOccupy);
         dest.writeLong(roomSetId);
         dest.writeDouble(deposit);
     }
@@ -115,11 +119,14 @@ public class Room extends LitePalSupport implements Parcelable {
     }
 
     public boolean isOccupy() {
-        return isOccupy;
+        return isOccupy==1;
     }
 
     public void setOccupy(boolean occupy) {
-        isOccupy = occupy;
+        if (occupy)
+            isOccupy = 1;
+        else
+            isOccupy = 2;
     }
 
     public long getRoomSet_id() {
@@ -158,6 +165,20 @@ public class Room extends LitePalSupport implements Parcelable {
         return memoForRoom;
     }
 
+    public Charge getLastCharge() {
+        List<Charge> charges = LitePal.where("roomId=?", String.valueOf(id)).find(Charge.class);
+        if (charges.size()==0){
+            Log.d(TAG, roomNum+"getLastCharge: is null");
+            return null;
+        }
+        Log.d(TAG, "getLastCharge size: "+charges.size());
+        Charge charge = charges.get(0);
+        for (Charge charge1:charges)
+            if (charge1.getCreateDate()>charge.getCreateDate())
+                charge = charge1;
+        return charge;
+    }
+
     public String getDetail() {
         StringBuilder sb = new StringBuilder();
         if (!TextUtils.isEmpty(username))
@@ -165,40 +186,30 @@ public class Room extends LitePalSupport implements Parcelable {
         if (!TextUtils.isEmpty(tel))
             sb.append("电话：").append(tel);
 
-
-        List<Bill> billLasCheckOut = getBillsLastCheckOut();
-        for (Bill bill : billLasCheckOut) {
-            if (sb.length() > 0) sb.append("\n");
-            BillType billType = bill.getbillType();
-            sb.append(billType.getBillTypeName() + ":")
-                    .append("\n" + bill.getDuration())
-                    .append("\n" + bill.getDetail())
-                    .append("\n");
+        Charge lastCharge = getLastCharge();
+        if (lastCharge != null) {
+            List<Bill> billLasCheckOut = LitePal.where("charge_Id=?", String.valueOf(lastCharge.getId())).find(Bill.class);
+            for (Bill bill : billLasCheckOut) {
+                if (sb.length() > 0) sb.append("\n");
+                BillType billType = bill.getbillType();
+                sb.append(billType.getBillTypeName() + ":")
+                        .append("\n" + bill.getDuration())
+                        .append("\n" + bill.getDetail())
+                        .append("\n");
+            }
+            if (billLasCheckOut.size()>0)
+                sb.append("\n"+"共计: " + Util.getTotalHowMuchOfBillList(billLasCheckOut)+" 元\n");
         }
-        if (billLasCheckOut.size()>0)
-            sb.append("\n"+"共计:" + Util.getTotalHowMuchOfBillList(billLasCheckOut)+"\n");
 
         if (sb.length() > 0) sb.append("\n");
-        if (isOccupy) {
-            sb.append("入住日期：").append(Util.getDate(timeToLiveIn, "yyyy-MM-dd")).append("，");
+        if (isOccupy()) {
+            sb.append("入住日期：").append(Util.getDate(timeToLiveIn, "yyyy年MM月dd日")).append("，");
             sb.append("共住了").append(getDurationOfLiveIn());
         } else {
-            sb.append("空置日期：").append(Util.getDate(timeToMoveOut, "yyyy-MM-dd")).append("，");
+            sb.append("空置日期：").append(Util.getDate(timeToMoveOut, "yyyy年MM月dd日")).append("，");
             sb.append("已空置了").append(getDurationOfEmpty());
         }
         return sb.toString();
-    }
-
-    private List<Bill> getBillsLastCheckOut() {
-        List<BillType> billTypeList = getCheckedBillTypeList();
-        Util.sort(billTypeList);
-        List<Bill> billsToReturn = new ArrayList<>();
-        for (BillType billType : billTypeList) {
-            Bill lastBillOf = Util.getLastBillOf(this, billType);
-            if (lastBillOf != null)
-                billsToReturn.add(lastBillOf);
-        }
-        return billsToReturn;
     }
 
     private String getDurationOfEmpty() {
