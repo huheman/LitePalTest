@@ -22,10 +22,12 @@ public class Bill extends LitePalSupport {
     private BillType billType;
     private long charge_Id;
     public static final int BILL_ALL_OK = 0;
-    public static final int BILL_SET_BASEDEGREE = 1;
-    public static final int BILL_NOT_DEFINE = 2;
-    public static final int BILL_TOO_MUCH = 3;
-    public static final int BILL_ERROR = 4;
+    public static final int BILL_NOTREADY_RENT = 5;
+    public static final int BILL_SET_BASEDEGREE = 10;
+    public static final int BILL_NOT_DEFINE = 20;
+    public static final int BILL_NOT_INIT = 30;
+    public static final int BILL_TOO_MUCH = 40;
+    public static final int BILL_ERROR = 50;
 
     public long getBillType_id() {
         return billTypeId;
@@ -89,14 +91,17 @@ public class Bill extends LitePalSupport {
 
     public int getType() {
         if (!getbillType().isChargeOnDegree() && isReadyToRent()) return BILL_ALL_OK;
+        if (!getbillType().isChargeOnDegree() && !isReadyToRent()) return BILL_NOTREADY_RENT;
         if (fromDegree == 0 && toDegree != 0) return BILL_SET_BASEDEGREE; //描述是billtype底被设为toDegree
         if ((fromDegree != 0 && toDegree == 0) || (fromDegree != 0 && fromDegree == toDegree))
             return BILL_NOT_DEFINE;      //没抄，写这个月没收X费
         if (toDegree < fromDegree && !isLoop() || getbillType().getLoopThreshold() != 0 && (int) toDegree > getbillType().getLoopThreshold())
             return BILL_ERROR;      //出错，红色表明错误要求检查
+        if (fromDegree ==0 && toDegree==0) return BILL_NOT_INIT;
         if (CreateBillFragment.tooMuch(getLastBill(), toDegree, fromDegree))
             return BILL_TOO_MUCH;    //相差太多
         if (fromDegree != 0 && toDegree != 0) return BILL_ALL_OK;   //正常
+
         return 5;   //不知道是啥错误
     }
 
@@ -110,7 +115,12 @@ public class Bill extends LitePalSupport {
             if (fromDegreeStr.isEmpty()) fromDegree = 0;
             else fromDegree = Double.parseDouble(fromDegreeStr);
             String toDegreeStr = BaseActivity.getSP().getString(Util.getSPName(room, billType), "");
-            if (toDegreeStr.isEmpty()) toDegree = 0;
+            if (toDegreeStr.isEmpty()) {
+                if (fromDegreeStr.isEmpty())
+                    toDegree = 0;
+                else
+                    toDegree = fromDegree;
+            }
             else toDegree = Double.parseDouble(toDegreeStr);
         }
     }
@@ -152,6 +162,10 @@ public class Bill extends LitePalSupport {
     }
 
     public String getDetail() {
+        return getDetail(false);
+    }
+
+    public String getDetail(boolean hasOutput) {
         BillType billType = getbillType();
         if (billType.isChargeOnDegree()) {
             String toDegreeFormat = String.format("%.0f", toDegree);
@@ -168,8 +182,10 @@ public class Bill extends LitePalSupport {
                 case BILL_TOO_MUCH:
                     String normalDetail = getNormalDetail();
                     return normalDetail + "\n" + "数据与之前的差距很大，请仔细确认";
-                default:
+                case BILL_NOT_INIT:
                     return "还没设置读数，\n请前往“新建”标签设置读数";
+                default:
+                    return "未知错误";
             }
         } else {
             int month = Util.howManyMonth(toDate, fromDate);
@@ -189,7 +205,7 @@ public class Bill extends LitePalSupport {
 
     public Bill getLastBill() {
         Room room = LitePal.find(Room.class, roomId);
-        return Util.getLastBillOf(room, billType);
+        return Util.getLastBillOf(room, getbillType());
     }
 
     public String getDuration() {
@@ -230,9 +246,9 @@ public class Bill extends LitePalSupport {
         String priceEachDegreeFormat = String.format("%.2f", billType.getPriceEachDegree());
         String showDegree;
         if (!isLoop()) {
-            showDegree = toDegreeFormat + " - " + fromDegreeFormat + " = " + howMuchDegreeFormat + "度";
+            showDegree = toDegreeFormat + " - " + fromDegreeFormat + " = " + howMuchDegreeFormat + " 度";
         } else {
-            showDegree = (billType.getLoopThreshold() + 1) + " - " + fromDegreeFormat + " + " + toDegreeFormat + " = " + howMuchDegreeFormat + "度";
+            showDegree = (billType.getLoopThreshold() + 1) + " - " + fromDegreeFormat + " + " + toDegreeFormat + " = " + howMuchDegreeFormat + " 度";
         }
         return "数量: "+showDegree + "\n" +"金额: "+ howMuchDegreeFormat + " * " + priceEachDegreeFormat + " = " + howMuchFormat + " 元";
     }

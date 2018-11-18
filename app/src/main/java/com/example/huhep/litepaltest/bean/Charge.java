@@ -2,11 +2,14 @@ package com.example.huhep.litepaltest.bean;
 
 import android.support.annotation.NonNull;
 
+import com.example.huhep.litepaltest.utils.Util;
+
 import org.litepal.LitePal;
 import org.litepal.crud.LitePalSupport;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Charge extends LitePalSupport {
     private long id;
@@ -19,9 +22,6 @@ public class Charge extends LitePalSupport {
         return passWord;
     }
 
-    public void setPassWord(String passWord) {
-        this.passWord = passWord;
-    }
 
     public long getCreateDate() {
         return createDate;
@@ -29,6 +29,11 @@ public class Charge extends LitePalSupport {
 
     public Charge() {
         this.createDate = System.currentTimeMillis();
+        this.passWord = UUID.randomUUID().toString().substring(0, 6);
+    }
+
+    public String getCreateDateToString() {
+        return Util.getWhen(createDate);
     }
 
     public List<Bill> getBillList() {
@@ -39,8 +44,7 @@ public class Charge extends LitePalSupport {
     }
 
     public void addBill(@NonNull Bill bill) {
-        if (billList==null) billList = new ArrayList<>();
-        billList.add(bill);
+        getBillList().add(bill);
     }
 
     public Charge(@NonNull Room room) {
@@ -53,7 +57,6 @@ public class Charge extends LitePalSupport {
     }
 
     public long getRoomId() {
-
         return roomId;
     }
 

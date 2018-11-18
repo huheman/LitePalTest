@@ -129,26 +129,25 @@ public class PreviewDetailFragment extends Fragment {
                 holder.roomNumTextView.setText(room.getRoomNum());
                 List<BillType> billTypeList = room.getCheckedBillTypeList();
                 Util.sort(billTypeList);
+                List<Bill> tempBill=new ArrayList<>();
                 for (BillType billType : billTypeList) {
                     Bill bill = new Bill(room, billType);
-                    if (bill.getType() == Bill.BILL_ALL_OK || bill.getType() == Bill.BILL_TOO_MUCH)
+                    tempBill.add(bill);
                     if (bill.getType() > state) state = bill.getType();
                     ItemComponents itemComponent = new ItemComponents(getContext(), null);
                     itemComponent.setTitle(billType.getBillTypeName());
                     itemComponent.setDuration(bill.getDuration());
                     itemComponent.setDetail(bill.getDetail());
-                    if (billType.isChargeOnDegree()) {
-                        itemComponent.setDetailColor(bill.getType());
-                    } else {
-                        if (!bill.isReadyToRent())
-                            itemComponent.duration.setVisibility(View.GONE);
-                    }
+                    itemComponent.setDetailColor(bill.getType());
+                    if (!bill.isReadyToRent())
+                        itemComponent.duration.setVisibility(View.GONE);
                     holder.linearLayout.addView(itemComponent);
                 }
                 ItemComponents itemComponents = new ItemComponents(getContext(), null);
                 itemComponents.setTitle("合计");
                 itemComponents.duration.setVisibility(View.GONE);
-                itemComponents.setDetail(Util.getTotalHowMuchOfBillList(PreviewFragment.chargeMap.get(room.getId()).getBillList()) + " 元");
+                double totalHowMuchOfBillList = Util.getTotalHowMuchOfBillList(tempBill);
+                itemComponents.setDetail( totalHowMuchOfBillList+ " 元");
                 holder.linearLayout.addView(itemComponents);
                 if (roomList.size() - 1 == position && onCreatedViewFinishedListener != null) {
                     onCreatedViewFinishedListener.onCreatedFinished(state);

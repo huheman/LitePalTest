@@ -10,6 +10,8 @@ import android.widget.TextView;
 import com.example.huhep.litepaltest.R;
 
 import static com.example.huhep.litepaltest.bean.Bill.BILL_ERROR;
+import static com.example.huhep.litepaltest.bean.Bill.BILL_NOTREADY_RENT;
+import static com.example.huhep.litepaltest.bean.Bill.BILL_NOT_INIT;
 import static com.example.huhep.litepaltest.bean.Bill.BILL_TOO_MUCH;
 
 public class ItemComponents extends ConstraintLayout {
@@ -45,6 +47,10 @@ public class ItemComponents extends ConstraintLayout {
                 break;
             case BILL_TOO_MUCH:
                 detail.setTextColor(getResources().getColor(android.R.color.holo_blue_light));
+                break;
+            case BILL_NOT_INIT:
+            case BILL_NOTREADY_RENT:
+                detail.setTextColor(getResources().getColor(R.color.deepDark));
                 break;
             default:
                 detail.setTextColor(getResources().getColor(R.color.deepDeepDark));

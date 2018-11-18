@@ -264,9 +264,10 @@ public class Util {
     public static double getTotalHowMuchOfBillList(List<Bill> billList) {
         double totalMoney = 0;
         for (Bill bill : billList) {
-            if (bill.getToDegree() != 0) {
-                if (bill.getType() == BILL_ALL_OK || bill.getType() == BILL_TOO_MUCH)
+            if (bill.getbillType().isChargeOnDegree()) {
+                if (bill.getType() == BILL_ALL_OK || bill.getType() == BILL_TOO_MUCH){
                     totalMoney += bill.howMuch();
+                }
             } else {
                 totalMoney += bill.howMuch();
             }

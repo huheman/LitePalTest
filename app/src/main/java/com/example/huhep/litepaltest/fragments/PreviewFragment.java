@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +38,8 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 
 import static com.example.huhep.litepaltest.bean.Bill.BILL_ERROR;
+import static com.example.huhep.litepaltest.bean.Bill.BILL_NOT_DEFINE;
+import static com.example.huhep.litepaltest.bean.Bill.BILL_NOT_INIT;
 import static com.example.huhep.litepaltest.bean.Bill.BILL_TOO_MUCH;
 
 public class PreviewFragment extends Fragment {
@@ -97,7 +100,11 @@ public class PreviewFragment extends Fragment {
         //如果是多种类型，则新建一个Map<"组名",Map<"费用名,List<Bill>>>的map,如果room属于组名里面的，则把组名对应的Map.get("费用名")的bill加上这个。
         List<Room> roomList = LitePal.where("isOccupy=1").find(Room.class);
         for (Room room : roomList) {
-            Charge charge = new Charge(room);
+            Charge charge;
+            Charge lastCharge = room.getLastCharge();
+            if (lastCharge!=null && lastCharge.getCreateDateToString().equalsIgnoreCase(Util.getWhen()))
+                charge = lastCharge;
+            else charge = new Charge(room);
             chargeMap.put(room.getId(),charge);
             List<BillType> checkedBillTypeList = room.getCheckedBillTypeList();
             Util.sort(checkedBillTypeList);
@@ -151,6 +158,9 @@ public class PreviewFragment extends Fragment {
                         case BILL_TOO_MUCH:
                             imageView.setImageResource(android.R.color.holo_blue_light);
                             break;
+                        case BILL_NOT_INIT:
+                            imageView.setImageResource(R.color.deepDark);
+                            break;
                         default:
                             imageView.setImageResource(R.color.deepDeepDark);
                             break;
@@ -203,29 +213,20 @@ public class PreviewFragment extends Fragment {
 
     private void saveBills() {
         int count = 0;
+        List<Long> roomIds=new ArrayList<>();
         for (Bill bill : billList) {
             int type = bill.getType();
             if (type == Bill.BILL_ALL_OK ||
                     type == Bill.BILL_TOO_MUCH ||
                     type == Bill.BILL_SET_BASEDEGREE) {
                 count++;
+                roomIds.add(bill.getRoom_id());
                 bill.save();
             }
         }
-        List<Room> roomList = LitePal.where("isOccupy=1").find(Room.class);
-        for (Room room : roomList) {
-            Charge charge = chargeMap.get(room.getId());
-            //至少有一条有效账单才保存
-            List<Bill> billList = charge.getBillList();
-            for (Bill billOfCharge : billList) {
-                int type = billOfCharge.getType();
-                if (type == Bill.BILL_ALL_OK ||
-                        type == Bill.BILL_TOO_MUCH ||
-                        type == Bill.BILL_SET_BASEDEGREE) {
-                    charge.save();
-                    break;
-                }
-            }
+
+        for (Long roomId : roomIds) {
+            chargeMap.get(roomId).save();
         }
         BaseActivity.show("保存了"+count+"条数据");
         //删除缓存

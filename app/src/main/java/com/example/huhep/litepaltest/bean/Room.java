@@ -34,6 +34,7 @@ public class Room extends LitePalSupport implements Parcelable {
     private long roomSetId;
     private double deposit;
     private int paidOnWechat;
+    private Charge lastCharge;
 
     public boolean isPaidOnWechat() {
         return paidOnWechat == 1;
@@ -166,17 +167,15 @@ public class Room extends LitePalSupport implements Parcelable {
     }
 
     public Charge getLastCharge() {
-        List<Charge> charges = LitePal.where("roomId=?", String.valueOf(id)).find(Charge.class);
-        if (charges.size()==0){
-            Log.d(TAG, roomNum+"getLastCharge: is null");
-            return null;
+        if (lastCharge==null){
+            List<Charge> charges = LitePal.where("roomId=?", String.valueOf(id)).find(Charge.class);
+            lastCharge = charges.get(0);
+            for (Charge charge1:charges)
+                if (charge1.getCreateDate()>lastCharge.getCreateDate())
+                    lastCharge = charge1;
         }
-        Log.d(TAG, "getLastCharge size: "+charges.size());
-        Charge charge = charges.get(0);
-        for (Charge charge1:charges)
-            if (charge1.getCreateDate()>charge.getCreateDate())
-                charge = charge1;
-        return charge;
+
+        return lastCharge;
     }
 
     public String getDetail() {
@@ -194,7 +193,7 @@ public class Room extends LitePalSupport implements Parcelable {
                 BillType billType = bill.getbillType();
                 sb.append(billType.getBillTypeName() + ":")
                         .append("\n" + bill.getDuration())
-                        .append("\n" + bill.getDetail())
+                        .append("\n" + bill.getDetail(true))
                         .append("\n");
             }
             if (billLasCheckOut.size()>0)
