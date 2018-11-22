@@ -52,6 +52,7 @@ public class MainFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     private String preRoomSetName="";
+    private Unbinder bind;
     private MainFrgmentListener mainFragmentlistener;
     @BindView(R.id.mainfragment_memolistview)
     ListView memoListView;
@@ -71,7 +72,7 @@ public class MainFragment extends Fragment {
     @BindView(R.id.mainfragment_toobar)
     MainToolBar mainToolBar;
 
-    MainToolBar.MainToolBarListener listener=new MainToolBar.MainToolBarListener() {
+    private MainToolBar.MainToolBarListener listener=new MainToolBar.MainToolBarListener() {
         @Override
         public void onSearchClicked() {
 
@@ -96,12 +97,7 @@ public class MainFragment extends Fragment {
         }
     };
 
-    public interface MainFrgmentListener{
-        void onNewRoomCreated();
-    }
-    private Unbinder bind;
     public MainFragment() {
-        // Required empty public constructor
     }
 
     public static MainFragment newInstance(String param1, String param2) {
@@ -179,7 +175,8 @@ public class MainFragment extends Fragment {
             RoomSet roomSet = roomSets.get(i);
             titles.add(roomSet.getRoomSetName());
             List<Room> rooms = LitePal.where("roomSetId=?",String.valueOf(roomSet.getId())).find(Room.class);
-            fragments.add(RoomFragment.newInstance(rooms));
+            RoomFragment fragment = RoomFragment.newInstance(rooms);
+            fragments.add(fragment);
         }
         FragmentStatePagerAdapter pagerAdapter = new FragmentStatePagerAdapter(getActivity().getSupportFragmentManager()) {
 
@@ -242,6 +239,10 @@ public class MainFragment extends Fragment {
             case BaseActivity.REQUEST_FROM_MAINFRAGMENT_TO_CHARGEMANAG:
                 if (mainFragmentlistener!=null) mainFragmentlistener.onNewRoomCreated();
                 break;
+            case BaseActivity.REQUEST_FROM_MAINFRAGMENT_TO_NEWROOM_FOR_REVERROOM:
+                setupTheRooms();
+                if (mainFragmentlistener!=null) mainFragmentlistener.onNewRoomCreated();
+                break;
         }
 
     }
@@ -249,4 +250,10 @@ public class MainFragment extends Fragment {
     public void setMainFragmentlistener(MainFrgmentListener mainFragmentlistener) {
         this.mainFragmentlistener = mainFragmentlistener;
     }
+
+    public interface MainFrgmentListener{
+        void onNewRoomCreated();
+    }
+
+
 }

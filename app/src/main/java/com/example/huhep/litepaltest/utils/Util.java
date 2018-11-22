@@ -17,6 +17,7 @@ import com.example.huhep.litepaltest.BaseActivity;
 import com.example.huhep.litepaltest.R;
 import com.example.huhep.litepaltest.bean.Bill;
 import com.example.huhep.litepaltest.bean.BillType;
+import com.example.huhep.litepaltest.bean.Charge;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.bean.RoomSet;
 
@@ -25,6 +26,7 @@ import org.litepal.LitePal;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -241,7 +243,6 @@ public class Util {
 
     public static Bill getLastBillOf(@NonNull Room room, @NonNull BillType billType) {
         if (room == null || billType == null)   return null;
-
         List<Bill> bills = LitePal.where("roomId=? and billTypeId=?", String.valueOf(room.getId()),
                 String.valueOf(billType.getId())).find(Bill.class);
         if (bills.size() == 0) {

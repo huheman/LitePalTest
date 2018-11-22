@@ -22,6 +22,7 @@ import com.example.huhep.litepaltest.MessageCollector;
 import com.example.huhep.litepaltest.R;
 import com.example.huhep.litepaltest.bean.Bill;
 import com.example.huhep.litepaltest.bean.BillType;
+import com.example.huhep.litepaltest.bean.Charge;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.utils.Util;
 
@@ -107,10 +108,13 @@ public class CreateBillFragment extends Fragment {
                 addChargeOnDegreeCollector(billType, index++);
             } else addChargeOnMonthCollector(billType);
         }
+        tellTheManageState();
     }
 
     private void addChargeOnDegreeCollector(BillType billType, int pos) {
         Bill lastBill = Util.getLastBillOf(room, billType);
+
+        Bill lastBillForNow = null;
         LinearLayout layout = getDefaultLinearLayout();
         int icon = R.drawable.ic_other;
         if (billType.getBillTypeName().contains("电"))
@@ -134,7 +138,8 @@ public class CreateBillFragment extends Fragment {
 
             @Override
             public void onFinishEditing(MessageCollector messageCollector) {
-
+                if (!BillManageFragment.roomsToShow.contains(room.getId()))
+                    BillManageFragment.roomsToShow.add(room.getId());
             }
 
             @Override
@@ -159,36 +164,60 @@ public class CreateBillFragment extends Fragment {
                                 messageCollector.setEditTextEnable(false);
                             }
                             messageCollector.setEditTextEnable(false);
-                            editor.putString(Util.getSPName(room, billType) + "_pre", s);
+                            editor.putString(Util.getSPName(room, billType) + "_pre", s).apply();
                         }).setNegativeButton("取消", (dialog, which) -> {
                     messageCollector.getEditText().setText(msgBefore);
                     if (lastBill != null)
                         messageCollector.getEditText().setText(String.valueOf(lastBill.getToDegree()));
-                    editor.putString(Util.getSPName(room, billType) + "_pre", msgBefore);
+                    editor.putString(Util.getSPName(room, billType) + "_pre", msgBefore).apply();
                     messageCollector.setEditTextEnable(false);
                 }).setCancelable(false).show();
             }
         });
         oldBillCollector.setTipsDrawable(icon);
         oldBillCollector.setTipsText("上次" + billType.getBillTypeName());
+        String tips =billType.getBillTypeName()+ "还没有收费记录";
+        String preDegree = sharedPreferences.getString(Util.getSPName(room, billType) + "_pre", "");
+        Charge charge =null;
         if (lastBill != null) {
-            String lastWhen = Util.getWhenAccurately(lastBill.getToDate());
-            double lastDegree = lastBill.getToDegree();
-            oldBillCollector.setPreDateTips("上次抄表日期是:" + lastWhen);
-            oldBillCollector.getEditText().setText(String.valueOf(lastDegree));
-            editor.putString(Util.getSPName(room, billType) + "_pre", String.valueOf(lastDegree));
-        } else {
-            oldBillCollector.setPreDateTips(billType.getBillTypeName() + "还没有收费记录");
-            String preMsg = sharedPreferences.getString(Util.getSPName(room, billType) + "_pre", "");
-            oldBillCollector.getEditText().setText(preMsg);
-            oldBillCollector.getEditText().setHint("请双击这里填" + billType.getBillTypeName() + "表底");
+            tips = "上次抄表日期是:";
+            charge = LitePal.find(Charge.class, lastBill.getCharge_Id());
+            if (charge != null && charge.getCreateDateToString().equalsIgnoreCase(Util.getWhen())) {
+                lastBillForNow = lastBill;
+                tips += Util.getWhenAccurately(lastBill.getFromDate());
+                if (lastBill.getFromDate() == 0)
+                    tips = "首次抄录日期未记录";
+            } else {
+                tips += Util.getWhenAccurately(lastBill.getToDate());
+            }
         }
+        if (preDegree.isEmpty()) {
+            if (lastBill != null) {
+                if (charge != null && charge.getCreateDateToString().equalsIgnoreCase(Util.getWhen())) {
+                    preDegree = String.valueOf(lastBill.getFromDegree());
+                } else {
+                    preDegree = String.valueOf(lastBill.getToDegree());
+                }
+                editor.putString(Util.getSPName(room, billType) + "_pre", preDegree).apply();
+            }
+        }
+        oldBillCollector.setPreDateTips(tips);
+        oldBillCollector.getEditText().setHint("请双击这里填" + billType.getBillTypeName() + "表底");
+        oldBillCollector.getEditText().setText(preDegree);
+
         CurrentMessageCollector currentMessageCollector = new CurrentMessageCollector(getContext(), null);
         currentMessageCollector.setTipsDrawable(icon);
         currentMessageCollector.setTipsText("本次" + billType.getBillTypeName());
-        String msg = sharedPreferences.getString(Util.getSPName(room, billType), "");
-        currentMessageCollector.getEditText().setText(msg);
-        currentMessageCollector.getEditText().setHint("请输入本月" + room.getRoomNum() + "房的" + billType.getBillTypeName() + "读数");
+        String thisDegree = sharedPreferences.getString(Util.getSPName(room, billType), "");
+        if (lastBillForNow != null) {
+            currentMessageCollector.setHint("修改本月数据");
+            if (thisDegree.isEmpty()) {
+                thisDegree = String.valueOf(lastBillForNow.getToDegree());
+                editor.putString(Util.getSPName(room, billType), String.valueOf(thisDegree)).apply();
+            }
+        }
+        currentMessageCollector.getEditText().setText(thisDegree);
+        currentMessageCollector.getEditText().setHint("输入" + room.getRoomNum() + "房" + billType.getBillTypeName() + "读数");
         currentMessageCollector.requestFocus();
         currentMessageCollector.setListener(new MessageCollector.MessageCollectorListener() {
             @Override
@@ -201,7 +230,8 @@ public class CreateBillFragment extends Fragment {
 
             @Override
             public void onFinishEditing(MessageCollector messageCollector) {
-
+                if (!BillManageFragment.roomsToShow.contains(room.getId()))
+                    BillManageFragment.roomsToShow.add(room.getId());
             }
 
             @Override
@@ -241,7 +271,7 @@ public class CreateBillFragment extends Fragment {
                                         tellTheManageState();
                                         currentMessageCollector.getEditText().setText("");
                                         currentMessageCollector.setHint("");
-                                        editor.remove(Util.getSPName(room, billType));
+                                        editor.remove(Util.getSPName(room, billType)).apply();
                                     })
                                     .setPositiveButton("是的", (dialog, which) -> {
                                         currentMessageCollector.setHint(billType.getBillTypeName() + "已经转了一圈。\n");
@@ -263,15 +293,15 @@ public class CreateBillFragment extends Fragment {
                         }
                     } else if (later < before) {
                         mapForState.put(pos, STATE_LESSTHAN);
-                        currentMessageCollector.setHint("本月读数不能小于上月读数");
+                        currentMessageCollector.setHint("本次读数不能小于上月读数");
                         currentMessageCollector.getEditText().setTextColor(getContext().getResources().getColor(R.color.lightRed));
                     } else if (later == before) {
                         mapForState.put(pos, STATE_SAMEAS);
-                        currentMessageCollector.setHint("本月读数跟上月读数一样，请注意确认");
+                        currentMessageCollector.setHint("本次读数跟上次读数一样，请注意确认");
                         currentMessageCollector.getEditText().setTextColor(getContext().getResources().getColor(android.R.color.holo_green_dark));
                     } else if (tooMuch(lastBill, later, before)) {
                         mapForState.put(pos, STATE_OUTOFBOUND);
-                        currentMessageCollector.setHint("这个月的读数比上个月太多/少，请注意确认\n");
+                        currentMessageCollector.setHint("本次读数"+(later-before)+" 度跟上次："+lastBill.howMuchDegree()+" 度差太多，请注意确认\n");
                         currentMessageCollector.getEditText().setTextColor(getContext().getResources().getColor(android.R.color.holo_blue_light));
                     } else if (billType.getLoopThreshold()!=0 && (int)later>billType.getLoopThreshold()){
                         mapForState.put(pos,STATE_LESSTHAN);
@@ -286,7 +316,7 @@ public class CreateBillFragment extends Fragment {
                     }
                 }
                 tellTheManageState();
-                editor.putString(Util.getSPName(room, billType), s);
+                editor.putString(Util.getSPName(room, billType), s).apply();
             }
         });
         currentMessageCollector.getEditText().setOnLongClickListener(v -> {
@@ -311,11 +341,9 @@ public class CreateBillFragment extends Fragment {
                 count++;
         }
         if (state > STATE_FINISH) return state;
-        if (mapForState.size() > 1 && count == mapForState.size()) {
+        if (mapForState.size()==0 ||count == mapForState.size())
             state = STATE_FINISH;
-        } else {
-            state = STATE_NOTFINISH;
-        }
+         else   state = STATE_NOTFINISH;
         return state;
     }
 
@@ -329,7 +357,7 @@ public class CreateBillFragment extends Fragment {
         if (lastBill == null)
             return false;
         double gap = later - before;
-        if (gap > (lastBill.getToDegree() - lastBill.getFromDegree()) * 1.5 || gap < (lastBill.getToDegree() - lastBill.getFromDegree()) * 0.5)
+        if (gap > lastBill.howMuchDegree() * 1.5 || gap < lastBill.howMuchDegree() * 0.5)
             return true;
         return false;
     }
@@ -345,7 +373,9 @@ public class CreateBillFragment extends Fragment {
 
     private boolean mayBeNewLoop(double later, double before, BillType billType) {
         int loopThreshold = billType.getLoopThreshold();
-        if (loopThreshold == 0) return false;
+        if (loopThreshold == 0 && later < before && later < 100) {
+            return true;
+        }
         if (later < before && later < 0.2 * loopThreshold && before > 0.8*loopThreshold) {
             return true;
         }
@@ -363,7 +393,6 @@ public class CreateBillFragment extends Fragment {
     }
 
     private void addChargeOnMonthCollector(BillType billType) {
-        LinearLayout layout = getDefaultLinearLayout();
         MessageCollector messageCollector = new MessageCollector(getContext(), null);
         messageCollector.setTipsText(billType.getBillTypeName());
         String rentPrice = String.valueOf(billType.getRentPrice());
@@ -379,6 +408,8 @@ public class CreateBillFragment extends Fragment {
 
             @Override
             public void onFinishEditing(MessageCollector messageCollector) {
+                if (!BillManageFragment.roomsToShow.contains(room.getId()))
+                    BillManageFragment.roomsToShow.add(room.getId());
             }
 
             @Override
@@ -410,17 +441,6 @@ public class CreateBillFragment extends Fragment {
         messageCollector.setDevider();
         if (!billType.getBillTypeName().contains("租金"))
             messageCollector.setTipsDrawable(R.drawable.ic_other);
-        layout.addView(messageCollector, -1, -2);
-        view.addView(layout);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        editor.apply();
-    }
-
-    public void saveMessage() {
-        editor.apply();
+        view.addView(messageCollector);
     }
 }

@@ -16,6 +16,7 @@ import org.litepal.crud.LitePalSupport;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,19 +34,7 @@ public class Room extends LitePalSupport implements Parcelable {
     private int isOccupy;
     private long roomSetId;
     private double deposit;
-    private int paidOnWechat;
     private Charge lastCharge;
-
-    public boolean isPaidOnWechat() {
-        return paidOnWechat == 1;
-    }
-
-    public void setPaidOnWechat(boolean paidOnWechat) {
-        if (paidOnWechat)
-            this.paidOnWechat = 1;
-        else
-            this.paidOnWechat = 2;
-    }
 
     public void setRoomSet_id(long roomSet_id) {
         this.roomSetId = roomSet_id;
@@ -169,6 +158,7 @@ public class Room extends LitePalSupport implements Parcelable {
     public Charge getLastCharge() {
         if (lastCharge==null){
             List<Charge> charges = LitePal.where("roomId=?", String.valueOf(id)).find(Charge.class);
+            if (charges.size()==0) return null;
             lastCharge = charges.get(0);
             for (Charge charge1:charges)
                 if (charge1.getCreateDate()>lastCharge.getCreateDate())
@@ -187,17 +177,8 @@ public class Room extends LitePalSupport implements Parcelable {
 
         Charge lastCharge = getLastCharge();
         if (lastCharge != null) {
-            List<Bill> billLasCheckOut = LitePal.where("charge_Id=?", String.valueOf(lastCharge.getId())).find(Bill.class);
-            for (Bill bill : billLasCheckOut) {
-                if (sb.length() > 0) sb.append("\n");
-                BillType billType = bill.getbillType();
-                sb.append(billType.getBillTypeName() + ":")
-                        .append("\n" + bill.getDuration())
-                        .append("\n" + bill.getDetail(true))
-                        .append("\n");
-            }
-            if (billLasCheckOut.size()>0)
-                sb.append("\n"+"共计: " + Util.getTotalHowMuchOfBillList(billLasCheckOut)+" 元\n");
+            if (sb.length() > 0) sb.append("\n");
+            sb.append(lastCharge.getDescribe());
         }
 
         if (sb.length() > 0) sb.append("\n");
@@ -210,6 +191,7 @@ public class Room extends LitePalSupport implements Parcelable {
         }
         return sb.toString();
     }
+
 
     private String getDurationOfEmpty() {
         SparseIntArray duration = Util.duration(System.currentTimeMillis(), timeToMoveOut);

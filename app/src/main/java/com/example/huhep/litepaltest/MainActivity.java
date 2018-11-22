@@ -1,5 +1,6 @@
 package com.example.huhep.litepaltest;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -10,6 +11,7 @@ import android.view.MenuItem;
 
 import com.example.huhep.litepaltest.bean.Bill;
 import com.example.huhep.litepaltest.bean.BillType;
+import com.example.huhep.litepaltest.bean.Charge;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.bean.RoomSet;
 import com.example.huhep.litepaltest.fragments.BillManageFragment;
@@ -17,6 +19,7 @@ import com.example.huhep.litepaltest.fragments.CreateBillFragment;
 import com.example.huhep.litepaltest.fragments.MainFragment;
 import com.example.huhep.litepaltest.fragments.PreviewDetailFragment;
 import com.example.huhep.litepaltest.fragments.PreviewFragment;
+import com.example.huhep.litepaltest.fragments.RoomFragment;
 import com.example.huhep.litepaltest.utils.Util;
 
 import org.litepal.LitePal;
@@ -32,9 +35,6 @@ public class MainActivity extends BaseActivity {
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = item -> {
         MainActivity activity = MainActivity.this;
-        if (item.getItemId() != R.id.navigation_newpage && activity.billManageFragment != null) {
-            activity.billManageFragment.saveAllMessage();
-        }
         FragmentTransaction transaction = activity.fragmentManager.beginTransaction();
         hideFragment(transaction);
         switch (item.getItemId()) {
@@ -52,22 +52,13 @@ public class MainActivity extends BaseActivity {
                 //每次点进来都应该重新生成
                 if (activity.previewFragment == null) {
                     activity.previewFragment = new PreviewFragment();
-                    activity.previewFragment.setOnViewHolderClickedListener(roomId -> {
-                        activity.navigationView.setSelectedItemId(R.id.navigation_newpage);
-                        if (activity.billManageFragment.getViewPager() == null)
-                            activity.billManageFragment.setRoomIdToShow(roomId);
-                        else
-                            activity.billManageFragment.showViewPagerSelectRoom(roomId);
-                    });
-                    activity.previewFragment.setOnBillsSavedListener(new PreviewFragment.OnBillsSavedListener() {
-                        @Override
-                        public void onBillSaved() {
-                            activity.navigationView.setSelectedItemId(R.id.navigation_home);
-                            activity.mainFragment.setupTheRooms();
-                            if (activity.billManageFragment != null) {
-                                activity.billManageFragment.setupView();
-                                activity.billManageFragment.setupToolBar();
-                            }
+                    activity.previewFragment.setOnViewHolderClickedListener(activity::reflashBillManageFragment);
+                    activity.previewFragment.setOnBillsSavedListener(() -> {
+                        activity.navigationView.setSelectedItemId(R.id.navigation_home);
+                        activity.mainFragment.setupTheRooms();
+                        if (activity.billManageFragment != null) {
+                            activity.billManageFragment.setupView();
+                            activity.billManageFragment.setupToolBar();
                         }
                     });
                     transaction.add(R.id.main_constraintLayout, activity.previewFragment);
@@ -78,10 +69,11 @@ public class MainActivity extends BaseActivity {
                 transaction.show(activity.previewFragment).commit();
                 break;
             case R.id.navigation_analize:
-                LitePal.deleteAll(Bill.class);
                 break;
 
             case R.id.navigation_backup:
+                LitePal.deleteAll(Charge.class);
+                LitePal.deleteAll(Bill.class);
                 LitePal.deleteAll(RoomSet.class);
                 LitePal.deleteAll(Room.class);
                 LitePal.deleteAll(BillType.class);
@@ -108,6 +100,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
@@ -125,5 +118,13 @@ public class MainActivity extends BaseActivity {
             }
         });
         fragmentManager.beginTransaction().add(R.id.main_constraintLayout, mainFragment).show(mainFragment).commit();
+    }
+
+    public void reflashBillManageFragment(long roomId) {
+        navigationView.setSelectedItemId(R.id.navigation_newpage);
+        if (billManageFragment.getViewPager() == null)
+            billManageFragment.setRoomIdToShow(roomId);
+        else
+            billManageFragment.showViewPagerSelectRoom(roomId);
     }
 }

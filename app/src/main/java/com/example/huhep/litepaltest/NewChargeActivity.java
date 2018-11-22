@@ -134,6 +134,7 @@ public class NewChargeActivity extends BaseActivity {
         isChargePerDegree = billType.isChargeOnDegree();
         billTypeEditText = billType.getBillTypeName();
         billTypeMaxLoop = String.valueOf(billType.getLoopThreshold());
+        if (billTypeMaxLoop.equalsIgnoreCase("0")) billTypeMaxLoop = "";
         if (isChargePerDegree) {
             billTypePrice = String.valueOf(billType.getPriceEachDegree());
             maxLoopCollector.setVisibility(View.VISIBLE);
@@ -171,9 +172,10 @@ public class NewChargeActivity extends BaseActivity {
         priceCollector.setListener(listener);
         priceCollector.setHint(hintForPrice);
 
-        maxLoopCollector.setTipsText("最大读数");
+        maxLoopCollector.setTipsText("最大量程");
         maxLoopCollector.setTipsDrawable(android.R.color.transparent);
         maxLoopCollector.getEditText().setText(billTypeMaxLoop);
+        maxLoopCollector.getEditText().setHint("填写最大读数");
         maxLoopCollector.setHint("未知可以先填0");
     }
 

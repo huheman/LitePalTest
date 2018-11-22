@@ -21,6 +21,7 @@ public class Bill extends LitePalSupport {
     private double toDegree;
     private BillType billType;
     private long charge_Id;
+    private Bill lastBill;
     public static final int BILL_ALL_OK = 0;
     public static final int BILL_NOTREADY_RENT = 5;
     public static final int BILL_SET_BASEDEGREE = 10;
@@ -29,12 +30,15 @@ public class Bill extends LitePalSupport {
     public static final int BILL_TOO_MUCH = 40;
     public static final int BILL_ERROR = 50;
 
+
+
     public long getBillType_id() {
         return billTypeId;
     }
 
     public void setBillType_id(long billType_id) {
         this.billTypeId = billType_id;
+        billType = LitePal.find(BillType.class, billType_id);
     }
 
     public double getFromDegree() {
@@ -90,8 +94,7 @@ public class Bill extends LitePalSupport {
     }
 
     public int getType() {
-        if (!getbillType().isChargeOnDegree() && isReadyToRent()) return BILL_ALL_OK;
-        if (!getbillType().isChargeOnDegree() && !isReadyToRent()) return BILL_NOTREADY_RENT;
+        if (!getbillType().isChargeOnDegree()) return BILL_ALL_OK;
         if (fromDegree == 0 && toDegree != 0) return BILL_SET_BASEDEGREE; //描述是billtype底被设为toDegree
         if ((fromDegree != 0 && toDegree == 0) || (fromDegree != 0 && fromDegree == toDegree))
             return BILL_NOT_DEFINE;      //没抄，写这个月没收X费
@@ -101,7 +104,6 @@ public class Bill extends LitePalSupport {
         if (CreateBillFragment.tooMuch(getLastBill(), toDegree, fromDegree))
             return BILL_TOO_MUCH;    //相差太多
         if (fromDegree != 0 && toDegree != 0) return BILL_ALL_OK;   //正常
-
         return 5;   //不知道是啥错误
     }
 
@@ -125,7 +127,6 @@ public class Bill extends LitePalSupport {
         }
     }
 
-
     public long getCharge_Id() {
         return charge_Id;
     }
@@ -133,7 +134,14 @@ public class Bill extends LitePalSupport {
     private void createDate(Room room, BillType billType) {
         Bill lastBill = getLastBill();
         if (lastBill == null) fromDate = 0;
-        else fromDate = lastBill.toDate;
+        else{
+            Charge charge = LitePal.find(Charge.class, lastBill.getCharge_Id());
+            if (charge!=null && charge.getCreateDateToString().equalsIgnoreCase(Util.getWhen()))
+                fromDate = lastBill.fromDate;
+            else{
+                fromDegree = lastBill.toDate;
+            }
+        }
         if (billType.isChargeOnDegree()) {
             toDate = System.currentTimeMillis();
         } else {
@@ -161,11 +169,8 @@ public class Bill extends LitePalSupport {
         return billType;
     }
 
-    public String getDetail() {
-        return getDetail(false);
-    }
 
-    public String getDetail(boolean hasOutput) {
+    public String getDetail() {
         BillType billType = getbillType();
         if (billType.isChargeOnDegree()) {
             String toDegreeFormat = String.format("%.0f", toDegree);
@@ -181,7 +186,7 @@ public class Bill extends LitePalSupport {
                     return "本月读数" + toDegreeFormat + "小于上月读数" + fromDegreeFormat + ",\n请返回修改！";
                 case BILL_TOO_MUCH:
                     String normalDetail = getNormalDetail();
-                    return normalDetail + "\n" + "数据与之前的差距很大，请仔细确认";
+                    return normalDetail + "\n上次数据是" +getLastBill().howMuchDegree()+"度，\n差距很大，请仔细确认";
                 case BILL_NOT_INIT:
                     return "还没设置读数，\n请前往“新建”标签设置读数";
                 default:
@@ -189,8 +194,6 @@ public class Bill extends LitePalSupport {
             }
         } else {
             int month = Util.howManyMonth(toDate, fromDate);
-            if (!isReadyToRent())
-                return  getbillType().getBillTypeName() + "收到" + Util.getWhen(fromDate) + "\n还没到时候收";
             return month + "个月" + billType.getBillTypeName() + ": " + howMuch() + " 元";
         }
     }
@@ -204,8 +207,11 @@ public class Bill extends LitePalSupport {
     }
 
     public Bill getLastBill() {
-        Room room = LitePal.find(Room.class, roomId);
-        return Util.getLastBillOf(room, getbillType());
+        if (lastBill==null){
+            Room room = LitePal.find(Room.class, roomId);
+            lastBill = Util.getLastBillOf(room, getbillType());
+        }
+        return lastBill;
     }
 
     public String getDuration() {
@@ -216,7 +222,6 @@ public class Bill extends LitePalSupport {
             else
                 from = Util.getWhenAccurately(fromDate);
         }
-        if (!getbillType().isChargeOnDegree() && !isReadyToRent()) return "";
         if (!getbillType().isChargeOnDegree())
             return from + " ~ " + Util.getWhen(toDate);
         else
@@ -230,6 +235,7 @@ public class Bill extends LitePalSupport {
 
     public boolean isLoop() {
         BillType billType = getbillType();
+        if (billType==null) return false;
         int loopThreshold = billType.getLoopThreshold();
         if (loopThreshold == 0) return false;
         if (toDegree < fromDegree && toDegree < 0.2 * loopThreshold && fromDegree > 0.8 * loopThreshold)

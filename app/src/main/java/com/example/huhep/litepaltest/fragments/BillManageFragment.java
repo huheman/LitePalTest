@@ -2,10 +2,8 @@ package com.example.huhep.litepaltest.fragments;
 
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,10 +12,8 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,13 +27,13 @@ import com.example.huhep.litepaltest.BaseActivity;
 import com.example.huhep.litepaltest.ChargeManageActivity;
 import com.example.huhep.litepaltest.CustomToolbar;
 import com.example.huhep.litepaltest.R;
+import com.example.huhep.litepaltest.bean.Charge;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.utils.Util;
 
 import org.litepal.LitePal;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -45,7 +41,6 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 import static com.example.huhep.litepaltest.BaseActivity.REQUEST_FROM_BILLMANAGE_TO_CHARGEMANAGE;
-import static com.example.huhep.litepaltest.BaseActivity.WHEN_KEY_FOR_SHP;
 import static com.example.huhep.litepaltest.fragments.CreateBillFragment.STATE_FINISH;
 import static com.example.huhep.litepaltest.fragments.CreateBillFragment.STATE_LESSTHAN;
 import static com.example.huhep.litepaltest.fragments.CreateBillFragment.STATE_NOTFINISH;
@@ -71,6 +66,7 @@ public class BillManageFragment extends Fragment {
     private List<Room> roomList;
     private Unbinder bind;
     private long roomIdToShow;
+    public static List<Long> roomsToShow;
     private FragmentStatePagerAdapter adapter;
     private List<CreateBillFragment> fragmentList;
     private static final String TAG = "PengPeng";
@@ -90,19 +86,21 @@ public class BillManageFragment extends Fragment {
     }
 
     public void setupView() {
-        setupView(LitePal.findAll(Room.class));
+        setupView(LitePal.where("isOccupy=1").find(Room.class));
     }
 
     public void setupView(@NonNull List<Room> roomListFromOut) {
         //每次刷新前都检查下当前时间是否为所在月份，不在则把之前的数据清零
         SharedPreferences sp = BaseActivity.getSP();
         String whenFromSP = sp.getString(BaseActivity.WHEN_KEY_FOR_SHP, "");
-        if (!whenFromSP.equalsIgnoreCase(Util.getWhen())){
+        if (roomListFromOut.size()>1 && !whenFromSP.equalsIgnoreCase(Util.getWhen())){
             SharedPreferences.Editor editor = sp.edit();
             editor.clear();
             editor.putString(BaseActivity.WHEN_KEY_FOR_SHP, Util.getWhen());
             editor.apply();
         }
+        //重置需要生成的列表
+        roomsToShow=new ArrayList<>();
         roomList = roomListFromOut;
         Util.sort(roomList);
         if (roomList.size()==0) {
@@ -184,18 +182,16 @@ public class BillManageFragment extends Fragment {
 
     private List<CreateBillFragment> getFragments() {
         List<CreateBillFragment> fragments = new ArrayList<>();
-        for (Room room : roomList)
+        for (Room room : roomList){
+            Charge lastCharge = room.getLastCharge();
+            if (lastCharge==null || !lastCharge.getCreateDateToString().equalsIgnoreCase(Util.getWhen()))
+                roomsToShow.add(room.getId());
             fragments.add(CreateBillFragment.newInstance(room));
+        }
+
         return fragments;
     }
 
-    public void saveAllMessage() {
-        if (fragmentList==null) return;
-        for (Fragment fragment : fragmentList) {
-            CreateBillFragment fragment1 = (CreateBillFragment) fragment;
-            fragment1.saveMessage();
-        }
-    }
 
     public void setupToolBar() {
         toolbar.getToolbar().getMenu().clear();

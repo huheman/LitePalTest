@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -101,6 +102,11 @@ public class NewRoomActivity extends BaseActivity {
             phoneNumberEditText = room.getTel();
             roomSetNameText = Util.getRoomSetFromId(room.getRoomSet_id()).getRoomSetName();
             isOccupy = room.isOccupy();
+            roomnumber.setFocusable(false);
+            roomnumber.getEditText().setTextColor(getResources().getColor(R.color.deepDark));
+            deposit.getEditText().requestFocus();
+            newRoomButton.setText("修改房间");
+            toolbar.setTitle("修改房间信息");
         }
     }
 
@@ -175,10 +181,14 @@ public class NewRoomActivity extends BaseActivity {
 
     private void setupRoomNumber() {
         roomnumber.setHint("房间号不能为空");
-        final EditText editText = roomnumber.getEditText();
+        EditText editText = roomnumber.getEditText();
         editText.setInputType(InputType.TYPE_CLASS_TEXT);
         editText.setText(roomNumberEditText);
-        newRoomButton.setEnabled(false);
+        if (spinnerIsNull || TextUtils.isEmpty(roomNumberEditText))
+            newRoomButton.setEnabled(false);
+         else
+            newRoomButton.setEnabled(true);
+
         roomnumber.setTipsDrawable(android.R.color.transparent);
 
         deposit.getTextView().setText("押金");
@@ -213,11 +223,8 @@ public class NewRoomActivity extends BaseActivity {
         if (roomSetNames.size() == 0) {
             roomSetNames.add("请新建一个组别");
             spinnerIsNull = true;
-            newRoomButton.setEnabled(false);
         } else {
             spinnerIsNull = false;
-            if (roomnumber.getEditText().getText().length()>0)
-                newRoomButton.setEnabled(true);
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, roomSetNames);

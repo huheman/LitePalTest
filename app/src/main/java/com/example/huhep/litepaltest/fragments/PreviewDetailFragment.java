@@ -86,11 +86,29 @@ public class PreviewDetailFragment extends Fragment {
         class ViewHolder extends RecyclerView.ViewHolder {
             private TextView roomNumTextView;
             private LinearLayout linearLayout;
+            private boolean isCheck;
+
+            public void setCheck(boolean isCheck) {
+                this.isCheck = isCheck;
+                setTitleColor(isCheck);
+            }
+
+            public boolean isCheck() {
+                return isCheck;
+            }
 
             public ViewHolder(View itemView) {
                 super(itemView);
                 roomNumTextView = itemView.findViewById(R.id.previewdetailitem_roomnum);
                 linearLayout = itemView.findViewById(R.id.previewdetailitem_linearLayout);
+            }
+
+            public void setTitleColor(boolean contains) {
+                if (contains) {
+                    roomNumTextView.setBackgroundResource(R.color.lightBlue);
+                } else {
+                    roomNumTextView.setBackgroundResource(R.color.loeckedDark);
+                }
             }
         }
 
@@ -127,11 +145,15 @@ public class PreviewDetailFragment extends Fragment {
             } else {
                 Room room = roomList.get(position);
                 holder.roomNumTextView.setText(room.getRoomNum());
+                holder.setCheck(BillManageFragment.roomsToShow != null && BillManageFragment.roomsToShow.contains(room.getId()));
                 List<BillType> billTypeList = room.getCheckedBillTypeList();
                 Util.sort(billTypeList);
-                List<Bill> tempBill=new ArrayList<>();
+                List<Bill> tempBill = new ArrayList<>();
                 for (BillType billType : billTypeList) {
                     Bill bill = new Bill(room, billType);
+                    if (PreviewFragment.chargeMap.get(room.getId()).containBill(bill)) {
+                        bill = PreviewFragment.chargeMap.get(room.getId()).getSameBill(bill);
+                    }
                     tempBill.add(bill);
                     if (bill.getType() > state) state = bill.getType();
                     ItemComponents itemComponent = new ItemComponents(getContext(), null);
@@ -139,15 +161,13 @@ public class PreviewDetailFragment extends Fragment {
                     itemComponent.setDuration(bill.getDuration());
                     itemComponent.setDetail(bill.getDetail());
                     itemComponent.setDetailColor(bill.getType());
-                    if (!bill.isReadyToRent())
-                        itemComponent.duration.setVisibility(View.GONE);
                     holder.linearLayout.addView(itemComponent);
                 }
                 ItemComponents itemComponents = new ItemComponents(getContext(), null);
                 itemComponents.setTitle("合计");
                 itemComponents.duration.setVisibility(View.GONE);
                 double totalHowMuchOfBillList = Util.getTotalHowMuchOfBillList(tempBill);
-                itemComponents.setDetail( totalHowMuchOfBillList+ " 元");
+                itemComponents.setDetail(totalHowMuchOfBillList + " 元");
                 holder.linearLayout.addView(itemComponents);
                 if (roomList.size() - 1 == position && onCreatedViewFinishedListener != null) {
                     onCreatedViewFinishedListener.onCreatedFinished(state);
@@ -155,6 +175,17 @@ public class PreviewDetailFragment extends Fragment {
                 holder.linearLayout.setOnClickListener(v -> {
                     if (onViewHolderClickedListener != null)
                         onViewHolderClickedListener.onViewHolderClicked(room.getId());
+                });
+                holder.roomNumTextView.setOnClickListener(v -> {
+                    if (BillManageFragment.roomsToShow != null) {
+                        if (BillManageFragment.roomsToShow.contains(room.getId())) {
+                            BillManageFragment.roomsToShow.remove(room.getId());
+                            holder.setCheck(false);
+                        } else{
+                            BillManageFragment.roomsToShow.add(room.getId());
+                            holder.setCheck(true);
+                        }
+                    }
                 });
             }
         }

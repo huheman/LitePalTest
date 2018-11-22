@@ -28,6 +28,7 @@ public class ItemComponents extends ConstraintLayout {
         duration = findViewById(R.id.itemCompund_durationtextView);
     }
 
+
     public void setTitle(String string) {
         title.setText(string);
     }

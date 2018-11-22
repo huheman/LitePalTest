@@ -86,7 +86,6 @@ public class PreviewFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_preview, container, false);
         unbinder = ButterKnife.bind(this, view);
-
         setupToolbar();
         setupBillList();
         setupView();
@@ -94,6 +93,7 @@ public class PreviewFragment extends Fragment {
     }
 
     public void setupBillList() {
+
         billList = new ArrayList<>();
         billOfName = new HashMap<>();
         chargeMap = new LongSparseArray<>();
@@ -111,7 +111,18 @@ public class PreviewFragment extends Fragment {
             for (BillType checkBillType : checkedBillTypeList) {
                 //所有类型即使出错都放到list里
                 Bill bill = new Bill(room, checkBillType);
-                charge.addBill(bill);
+                if (charge.containBill(bill)){
+                    Bill sameBill = charge.getSameBill(bill);
+                    sameBill.setFromDegree(bill.getFromDegree());
+                    sameBill.setToDegree(bill.getToDegree());
+                    sameBill.setToDate(bill.getToDate());
+                    if (bill.getbillType().isChargeOnDegree())
+                        sameBill.setFromDate(bill.getFromDate());
+                    bill = sameBill;
+                }
+                else{
+                    charge.addBill(bill);
+                }
                 List<Bill> bills = billOfName.get(checkBillType.getBillTypeName());
                 if (bills == null) {
                     bills = new ArrayList<>();
@@ -199,9 +210,17 @@ public class PreviewFragment extends Fragment {
             BaseActivity.show("没有数据，请先新建房间和收费项目");
             return;
         }
+        int countToSave = 0;
+        if (BillManageFragment.roomsToShow != null) {
+            countToSave = BillManageFragment.roomsToShow.size();
+        }
+        if (countToSave==0){
+            BaseActivity.show("没有数据更新，取消打印");
+            return;
+        }
         new AlertDialog.Builder(getContext()).setCancelable(false)
                 .setTitle("即将打印")
-                .setMessage("请把打印机数据线与手机连接，再进行打印")
+                .setMessage("即将打印"+countToSave+"条数据,\n请把打印机数据线与手机连接，再进行打印")
                 .setPositiveButton("确认", (dialog, which) -> {
                     beginToPrint();
                     saveBills();
@@ -213,20 +232,21 @@ public class PreviewFragment extends Fragment {
 
     private void saveBills() {
         int count = 0;
-        List<Long> roomIds=new ArrayList<>();
         for (Bill bill : billList) {
             int type = bill.getType();
             if (type == Bill.BILL_ALL_OK ||
                     type == Bill.BILL_TOO_MUCH ||
-                    type == Bill.BILL_SET_BASEDEGREE) {
+                    type == Bill.BILL_SET_BASEDEGREE ||
+                    type == Bill.BILL_NOT_DEFINE) {
                 count++;
-                roomIds.add(bill.getRoom_id());
                 bill.save();
             }
         }
 
-        for (Long roomId : roomIds) {
-            chargeMap.get(roomId).save();
+        for (long roomid:BillManageFragment.roomsToShow) {
+            chargeMap.get(roomid).ceateDescrib();
+            chargeMap.get(roomid).setPaidOnWechat(false);
+            chargeMap.get(roomid).save();
         }
         BaseActivity.show("保存了"+count+"条数据");
         //删除缓存

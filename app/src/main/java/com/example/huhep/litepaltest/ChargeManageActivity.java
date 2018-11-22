@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
+import com.example.huhep.litepaltest.bean.Bill;
 import com.example.huhep.litepaltest.bean.BillType;
 import com.example.huhep.litepaltest.utils.Util;
 
@@ -78,6 +79,7 @@ public class ChargeManageActivity extends BaseActivity {
                         .setMessage("是否删除费用类型：" + billType.getBillTypeName())
                         .setPositiveButton("确定", (dialog, which) -> {
                             LitePal.delete(BillType.class, billType.getId());
+                            LitePal.deleteAll(Bill.class, "billTypeId=?", String.valueOf(billType.getId()));
                             reflashRecyclerView();
                         })
                         .setNegativeButton("取消", (dialog, which) -> viewHolder.swipeLayout.close())
@@ -196,10 +198,8 @@ public class ChargeManageActivity extends BaseActivity {
     public void SaveTheCheckedState() {
         for (int i = 0; i < billTypeList.size(); i++) {
             boolean checked = ((MyRecyclerViewAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(i)).isChecked();
-
-            if (stateStore==null || stateStore.indexOfKey(i)<0 || checked==stateStore.get(i) ) continue;
-            if (stateStore!=null)
-                Log.d(TAG, " check: "+checked);
+            if (stateStore==null || stateStore.indexOfKey(i)<0 ) continue;
+            Log.d(TAG, "check="+checked);
             BillType billType = billTypeList.get(i);
             if (roomIdBelongTo!=-1 && billType.getBelongTo()==-1)
                 saveAsNewPrivateBillType(checked,billType);
