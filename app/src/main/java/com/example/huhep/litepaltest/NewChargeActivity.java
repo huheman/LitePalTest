@@ -1,6 +1,5 @@
 package com.example.huhep.litepaltest;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -15,7 +14,6 @@ import com.example.huhep.litepaltest.utils.Util;
 
 import org.litepal.LitePal;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -187,8 +185,15 @@ public class NewChargeActivity extends BaseActivity {
 
     @OnClick(R.id.newcharge_createButton)
     public void createBillType(View view) {
+        long oldBilllTypeId=-1;
+        long oldBelongTo = -2;
+        if (billType!=null) {
+            oldBilllTypeId = billType.getId();
+            oldBelongTo = billType.getBelongTo();
+        }
         if (billType == null || billType.getBelongTo() == -1 && roomId != -1)
             billType = new BillType();
+
         billType.setBillTypeName(chargeNameCollector.getEditText().getText().toString());
         Double price = Double.valueOf(priceCollector.getEditText().getText().toString());
         if (radioGroup.getCheckedRadioButtonId() == R.id.newcharge_chargePreDegreeRadioButton) {
@@ -210,6 +215,12 @@ public class NewChargeActivity extends BaseActivity {
         }
         billType.setBelongTo(roomId);
         billType.save();
+        if (oldBelongTo == -1 && roomId != -1) {
+            String preOldMsg = BaseActivity.getSP().getString(Util.getSPName(roomId, oldBilllTypeId) + "_pre", "");
+            String curentOldMsg = BaseActivity.getSP().getString(Util.getSPName(roomId, oldBilllTypeId), "");
+            BaseActivity.getSP().edit().putString(Util.getSPName(roomId, billType.getId()) + "_pre", preOldMsg).apply();
+            BaseActivity.getSP().edit().putString(Util.getSPName(roomId, billType.getId()), curentOldMsg).apply();
+        }
         finish();
     }
 }

@@ -1,20 +1,30 @@
 package com.example.huhep.litepaltest.fragments;
 
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.huhep.litepaltest.BaseActivity;
 import com.example.huhep.litepaltest.CustomToolbar;
@@ -30,6 +40,7 @@ import org.litepal.LitePal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -38,16 +49,41 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 
 import static com.example.huhep.litepaltest.bean.Bill.BILL_ERROR;
-import static com.example.huhep.litepaltest.bean.Bill.BILL_NOT_DEFINE;
 import static com.example.huhep.litepaltest.bean.Bill.BILL_NOT_INIT;
 import static com.example.huhep.litepaltest.bean.Bill.BILL_TOO_MUCH;
 
 public class PreviewFragment extends Fragment {
     public static LongSparseArray<Charge> chargeMap;    //roomid对应charge
     public static List<Bill> billList; //所有的bill
-    public static HashMap<String, List<Bill>> billOfName;   //总体那里的bill
     private PreviewDetailFragment.onViewHolderClickedListener onViewHolderClickedListener;
     private Unbinder unbinder;
+    private Handler handler = new Handler();
+    private Button positiveBtn;
+    private TextView textView;
+
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            UsbManager usbManager = (UsbManager) getContext().getSystemService(Context.USB_SERVICE);
+            HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
+            if (deviceList.size() > 0) {
+                Iterator<String> iterator = deviceList.keySet().iterator();
+                while (iterator.hasNext()) {
+                    String deviceName = iterator.next();
+                    String productName = deviceList.get(deviceName).getProductId() + "";
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                        productName = deviceList.get(deviceName).getProductName();
+                    }
+                    String finalProductName = productName;
+                    textView.setText(finalProductName);
+                    positiveBtn.setEnabled(true);
+                }
+            } else {
+                positiveBtn.setEnabled(false);
+            }
+            handler.postDelayed(this, 1000);
+        }
+    };
 
     public void setOnBillsSavedListener(OnBillsSavedListener onBillsSavedListener) {
         this.onBillsSavedListener = onBillsSavedListener;
@@ -55,7 +91,7 @@ public class PreviewFragment extends Fragment {
 
     private OnBillsSavedListener onBillsSavedListener;
 
-    public interface OnBillsSavedListener{
+    public interface OnBillsSavedListener {
         void onBillSaved();
     }
 
@@ -73,6 +109,7 @@ public class PreviewFragment extends Fragment {
 
     @BindView(R.id.previewmanagerfragment_coordLayout)
     CoordinatorLayout coordinatorLayout;
+
     public void setOnViewHolderClickedListener(PreviewDetailFragment.onViewHolderClickedListener onViewHolderClickedListener) {
         this.onViewHolderClickedListener = onViewHolderClickedListener;
     }
@@ -93,25 +130,23 @@ public class PreviewFragment extends Fragment {
     }
 
     public void setupBillList() {
-
         billList = new ArrayList<>();
-        billOfName = new HashMap<>();
         chargeMap = new LongSparseArray<>();
         //如果是多种类型，则新建一个Map<"组名",Map<"费用名,List<Bill>>>的map,如果room属于组名里面的，则把组名对应的Map.get("费用名")的bill加上这个。
         List<Room> roomList = LitePal.where("isOccupy=1").find(Room.class);
         for (Room room : roomList) {
             Charge charge;
             Charge lastCharge = room.getLastCharge();
-            if (lastCharge!=null && lastCharge.getCreateDateToString().equalsIgnoreCase(Util.getWhen()))
+            if (lastCharge != null && lastCharge.getCreateDateToString().equalsIgnoreCase(Util.getWhen()) && lastCharge.getChargeType() != Charge.TYPE_LIVE_IN)
                 charge = lastCharge;
             else charge = new Charge(room);
-            chargeMap.put(room.getId(),charge);
+            chargeMap.put(room.getId(), charge);
             List<BillType> checkedBillTypeList = room.getCheckedBillTypeList();
             Util.sort(checkedBillTypeList);
             for (BillType checkBillType : checkedBillTypeList) {
                 //所有类型即使出错都放到list里
                 Bill bill = new Bill(room, checkBillType);
-                if (charge.containBill(bill)){
+                if (charge.containBill(bill)) {
                     Bill sameBill = charge.getSameBill(bill);
                     sameBill.setFromDegree(bill.getFromDegree());
                     sameBill.setToDegree(bill.getToDegree());
@@ -119,16 +154,9 @@ public class PreviewFragment extends Fragment {
                     if (bill.getbillType().isChargeOnDegree())
                         sameBill.setFromDate(bill.getFromDate());
                     bill = sameBill;
-                }
-                else{
+                } else {
                     charge.addBill(bill);
                 }
-                List<Bill> bills = billOfName.get(checkBillType.getBillTypeName());
-                if (bills == null) {
-                    bills = new ArrayList<>();
-                    billOfName.put(checkBillType.getBillTypeName(), bills);
-                }
-                bills.add(bill);
                 billList.add(bill);
             }
         }
@@ -136,11 +164,11 @@ public class PreviewFragment extends Fragment {
 
     public void setupView() {
         List<RoomSet> roomSetList = LitePal.findAll(RoomSet.class);
-        if (roomSetList.size()==0){
+        if (roomSetList.size() == 0) {
             coordinatorLayout.setVisibility(View.GONE);
             noRoomTextView.setVisibility(View.VISIBLE);
             return;
-        }else {
+        } else {
             noRoomTextView.setVisibility(View.GONE);
             coordinatorLayout.setVisibility(View.VISIBLE);
         }
@@ -189,7 +217,8 @@ public class PreviewFragment extends Fragment {
             tabLayout.getTabAt(i).setCustomView(R.layout.billmanagefragment_tablayout);
             TextView textView = tabLayout.getTabAt(i).getCustomView().findViewById(R.id.tab_textView);
             String title = "自定义";
-            if (list.get(i)!=-1) title = LitePal.find(RoomSet.class, list.get(i)).getRoomSetName();
+            if (list.get(i) != -1)
+                title = LitePal.find(RoomSet.class, list.get(i)).getRoomSetName();
             textView.setText(title);
         }
     }
@@ -205,29 +234,33 @@ public class PreviewFragment extends Fragment {
     }
 
     @OnClick(R.id.previewmanagefragment_printButton)
-    public void printButtonClicked(View view){
-        if (chargeMap.size()==0){
+    public void printButtonClicked(View view) {
+        if (chargeMap.size() == 0) {
             BaseActivity.show("没有数据，请先新建房间和收费项目");
             return;
         }
         int countToSave = 0;
-        if (BillManageFragment.roomsToShow != null) {
+        if (BillManageFragment.roomsToShow != null)
             countToSave = BillManageFragment.roomsToShow.size();
-        }
-        if (countToSave==0){
-            BaseActivity.show("没有数据更新，取消打印");
+        if (countToSave == 0) {
+            BaseActivity.show("没有数据更新，无需打印");
             return;
         }
-        new AlertDialog.Builder(getContext()).setCancelable(false)
+        textView = new TextView(getContext());
+        AlertDialog alertDialog = new AlertDialog.Builder(getContext()).setCancelable(false)
                 .setTitle("即将打印")
-                .setMessage("即将打印"+countToSave+"条数据,\n请把打印机数据线与手机连接，再进行打印")
+                .setMessage("即将打印" + countToSave + "条数据,\n请把打印机数据线与手机连接...")
                 .setPositiveButton("确认", (dialog, which) -> {
                     beginToPrint();
                     saveBills();
-                })
-                .setNegativeButton("取消", null)
-                .show();
-
+                }).setView(textView)
+                .setNegativeButton("取消",null)
+                .create();
+        alertDialog.setOnDismissListener(dialog -> handler.removeCallbacks(runnable));
+        alertDialog.show();
+        positiveBtn = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        //positiveBtn.setEnabled(false);
+        //new Thread(runnable).start();
     }
 
     private void saveBills() {
@@ -243,12 +276,12 @@ public class PreviewFragment extends Fragment {
             }
         }
 
-        for (long roomid:BillManageFragment.roomsToShow) {
-            chargeMap.get(roomid).ceateDescrib();
+        for (long roomid : BillManageFragment.roomsToShow) {
+            chargeMap.get(roomid).createDescrib();
             chargeMap.get(roomid).setPaidOnWechat(false);
             chargeMap.get(roomid).save();
         }
-        BaseActivity.show("保存了"+count+"条数据");
+        BaseActivity.show("保存了" + count + "条数据");
         //删除缓存
         BaseActivity.getSP().edit().clear().apply();
         if (onBillsSavedListener != null) {
@@ -257,5 +290,6 @@ public class PreviewFragment extends Fragment {
     }
 
     private void beginToPrint() {
+
     }
 }

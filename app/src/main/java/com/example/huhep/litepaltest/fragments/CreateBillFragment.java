@@ -69,9 +69,9 @@ public class CreateBillFragment extends Fragment {
     public static CreateBillFragment newInstance(Room room) {
         CreateBillFragment fragment = new CreateBillFragment();
         fragment.room = room;
-        if (sharedPreferences==null)
+        if (sharedPreferences == null)
             sharedPreferences = BaseActivity.getSP();
-        if (editor==null)
+        if (editor == null)
             editor = fragment.sharedPreferences.edit();
         return fragment;
     }
@@ -113,7 +113,6 @@ public class CreateBillFragment extends Fragment {
 
     private void addChargeOnDegreeCollector(BillType billType, int pos) {
         Bill lastBill = Util.getLastBillOf(room, billType);
-
         Bill lastBillForNow = null;
         LinearLayout layout = getDefaultLinearLayout();
         int icon = R.drawable.ic_other;
@@ -138,7 +137,7 @@ public class CreateBillFragment extends Fragment {
 
             @Override
             public void onFinishEditing(MessageCollector messageCollector) {
-                if (!BillManageFragment.roomsToShow.contains(room.getId()))
+                if (BillManageFragment.roomsToShow != null && !BillManageFragment.roomsToShow.contains(room.getId()))
                     BillManageFragment.roomsToShow.add(room.getId());
             }
 
@@ -176,9 +175,9 @@ public class CreateBillFragment extends Fragment {
         });
         oldBillCollector.setTipsDrawable(icon);
         oldBillCollector.setTipsText("上次" + billType.getBillTypeName());
-        String tips =billType.getBillTypeName()+ "还没有收费记录";
+        String tips = billType.getBillTypeName() + "还没有收费记录";
         String preDegree = sharedPreferences.getString(Util.getSPName(room, billType) + "_pre", "");
-        Charge charge =null;
+        Charge charge = null;
         if (lastBill != null) {
             tips = "上次抄表日期是:";
             charge = LitePal.find(Charge.class, lastBill.getCharge_Id());
@@ -201,6 +200,9 @@ public class CreateBillFragment extends Fragment {
                 editor.putString(Util.getSPName(room, billType) + "_pre", preDegree).apply();
             }
         }
+        if (lastBill != null&&charge != null && charge.getChargeType() == Charge.TYPE_MOVE_OUT) {
+            preDegree = String.valueOf(lastBill.getToDegree());
+        }
         oldBillCollector.setPreDateTips(tips);
         oldBillCollector.getEditText().setHint("请双击这里填" + billType.getBillTypeName() + "表底");
         oldBillCollector.getEditText().setText(preDegree);
@@ -215,6 +217,8 @@ public class CreateBillFragment extends Fragment {
                 thisDegree = String.valueOf(lastBillForNow.getToDegree());
                 editor.putString(Util.getSPName(room, billType), String.valueOf(thisDegree)).apply();
             }
+            if (charge.getChargeType()==Charge.TYPE_MOVE_OUT)
+                thisDegree = "";
         }
         currentMessageCollector.getEditText().setText(thisDegree);
         currentMessageCollector.getEditText().setHint("输入" + room.getRoomNum() + "房" + billType.getBillTypeName() + "读数");
@@ -230,7 +234,7 @@ public class CreateBillFragment extends Fragment {
 
             @Override
             public void onFinishEditing(MessageCollector messageCollector) {
-                if (!BillManageFragment.roomsToShow.contains(room.getId()))
+                if (BillManageFragment.roomsToShow != null && !BillManageFragment.roomsToShow.contains(room.getId()))
                     BillManageFragment.roomsToShow.add(room.getId());
             }
 
@@ -301,10 +305,10 @@ public class CreateBillFragment extends Fragment {
                         currentMessageCollector.getEditText().setTextColor(getContext().getResources().getColor(android.R.color.holo_green_dark));
                     } else if (tooMuch(lastBill, later, before)) {
                         mapForState.put(pos, STATE_OUTOFBOUND);
-                        currentMessageCollector.setHint("本次读数"+(later-before)+" 度跟上次："+lastBill.howMuchDegree()+" 度差太多，请注意确认\n");
+                        currentMessageCollector.setHint("本次读数" + (later - before) + " 度跟上次：" + lastBill.howMuchDegree() + " 度差太多，请注意确认\n");
                         currentMessageCollector.getEditText().setTextColor(getContext().getResources().getColor(android.R.color.holo_blue_light));
-                    } else if (billType.getLoopThreshold()!=0 && (int)later>billType.getLoopThreshold()){
-                        mapForState.put(pos,STATE_LESSTHAN);
+                    } else if (billType.getLoopThreshold() != 0 && (int) later > billType.getLoopThreshold()) {
+                        mapForState.put(pos, STATE_LESSTHAN);
                         currentMessageCollector.setHint("输入有误，比最大读数还大\n");
                         currentMessageCollector.getEditText().setTextColor(getContext().getResources().getColor(R.color.lightRed));
                     }
@@ -341,9 +345,9 @@ public class CreateBillFragment extends Fragment {
                 count++;
         }
         if (state > STATE_FINISH) return state;
-        if (mapForState.size()==0 ||count == mapForState.size())
+        if (mapForState.size() == 0 || count == mapForState.size())
             state = STATE_FINISH;
-         else   state = STATE_NOTFINISH;
+        else state = STATE_NOTFINISH;
         return state;
     }
 
@@ -376,7 +380,7 @@ public class CreateBillFragment extends Fragment {
         if (loopThreshold == 0 && later < before && later < 100) {
             return true;
         }
-        if (later < before && later < 0.2 * loopThreshold && before > 0.8*loopThreshold) {
+        if (later < before && later < 0.2 * loopThreshold && before > 0.8 * loopThreshold) {
             return true;
         }
         return false;
@@ -408,7 +412,7 @@ public class CreateBillFragment extends Fragment {
 
             @Override
             public void onFinishEditing(MessageCollector messageCollector) {
-                if (!BillManageFragment.roomsToShow.contains(room.getId()))
+                if (BillManageFragment.roomsToShow != null && !BillManageFragment.roomsToShow.contains(room.getId()))
                     BillManageFragment.roomsToShow.add(room.getId());
             }
 

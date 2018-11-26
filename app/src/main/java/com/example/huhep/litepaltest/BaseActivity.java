@@ -23,6 +23,7 @@ public class BaseActivity extends AppCompatActivity {
     public static final int RESULT_FROM_CHARGEMANG_TOMAINFRAGMENT = 543;
     public static final String WHEN_KEY_FOR_SHP = "when";
     public static final String ROOM_ID = "_room_id";
+    public static final String FORCE_TO_TRUE = "force_to_true";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

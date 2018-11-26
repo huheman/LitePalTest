@@ -21,6 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.example.huhep.litepaltest.bean.Charge.TYPE_LIVE_IN;
+
 public class Room extends LitePalSupport implements Parcelable {
     private static final String TAG = "PengPeng";
     private long id;
@@ -35,6 +37,7 @@ public class Room extends LitePalSupport implements Parcelable {
     private long roomSetId;
     private double deposit;
     private Charge lastCharge;
+    private List<BillType> checkBillTypeList;
 
     public void setRoomSet_id(long roomSet_id) {
         this.roomSetId = roomSet_id;
@@ -48,7 +51,7 @@ public class Room extends LitePalSupport implements Parcelable {
         memoForRoom = in.readString();
         username = in.readString();
         tel = in.readString();
-        isOccupy = in.readInt() ;
+        isOccupy = in.readInt();
         roomSetId = in.readLong();
         deposit = in.readDouble();
     }
@@ -109,14 +112,21 @@ public class Room extends LitePalSupport implements Parcelable {
     }
 
     public boolean isOccupy() {
-        return isOccupy==1;
+        return isOccupy == 1;
     }
 
     public void setOccupy(boolean occupy) {
-        if (occupy)
+        if (occupy && !isOccupy()) {
             isOccupy = 1;
-        else
+            if (getId() != 0) {
+                Charge liveInCharge = new Charge();
+                liveInCharge.setRoomId(getId());
+                liveInCharge.setChargeType(TYPE_LIVE_IN);
+                liveInCharge.save();
+            }
+        } else {
             isOccupy = 2;
+        }
     }
 
     public long getRoomSet_id() {
@@ -156,26 +166,25 @@ public class Room extends LitePalSupport implements Parcelable {
     }
 
     public Charge getLastCharge() {
-        if (lastCharge==null){
-            List<Charge> charges = LitePal.where("roomId=?", String.valueOf(id)).find(Charge.class);
-            if (charges.size()==0) return null;
-            lastCharge = charges.get(0);
-            for (Charge charge1:charges)
-                if (charge1.getCreateDate()>lastCharge.getCreateDate())
-                    lastCharge = charge1;
-        }
-
+        List<Charge> charges = LitePal.where("roomId=?", String.valueOf(id)).find(Charge.class);
+        if (charges.size() == 0) return null;
+        Charge lastCharge = charges.get(0);
+        for (Charge charge1 : charges)
+            if (charge1.getCreateDate() > lastCharge.getCreateDate())
+                lastCharge = charge1;
         return lastCharge;
     }
 
+
     public String getDetail() {
         StringBuilder sb = new StringBuilder();
-        if (!TextUtils.isEmpty(username))
-            sb.append("住户名:").append(username).append("   ");
-        if (!TextUtils.isEmpty(tel))
-            sb.append("电话：").append(tel);
-
         Charge lastCharge = getLastCharge();
+        if (isOccupy()) {
+            if (!TextUtils.isEmpty(username))
+                sb.append("住户名:").append(username).append("   ");
+            if (!TextUtils.isEmpty(tel))
+                sb.append("电话：").append(tel);
+        }
         if (lastCharge != null) {
             if (sb.length() > 0) sb.append("\n");
             sb.append(lastCharge.getDescribe());
@@ -191,7 +200,6 @@ public class Room extends LitePalSupport implements Parcelable {
         }
         return sb.toString();
     }
-
 
     private String getDurationOfEmpty() {
         SparseIntArray duration = Util.duration(System.currentTimeMillis(), timeToMoveOut);
@@ -223,13 +231,13 @@ public class Room extends LitePalSupport implements Parcelable {
     }
 
     public List<BillType> getCheckedBillTypeList() {
-        List<BillType> billTypeList = getBillTypeList();
-        Iterator<BillType> iterator = billTypeList.iterator();
+        List<BillType> checkBillTypeList = getBillTypeList();
+        Iterator<BillType> iterator = checkBillTypeList.iterator();
         while (iterator.hasNext()) {
             if (!iterator.next().isChecked()) {
                 iterator.remove();
             }
         }
-        return billTypeList;
+        return checkBillTypeList;
     }
 }

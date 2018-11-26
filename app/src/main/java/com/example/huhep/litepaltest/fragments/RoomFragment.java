@@ -1,29 +1,24 @@
 package com.example.huhep.litepaltest.fragments;
 
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.view.menu.MenuBuilder;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
@@ -39,12 +34,7 @@ import com.example.huhep.litepaltest.utils.Util;
 
 import org.litepal.LitePal;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.zip.Inflater;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -52,6 +42,9 @@ import butterknife.Unbinder;
 
 import static com.example.huhep.litepaltest.BaseActivity.REQUEST_FROM_MAINFRAGMENT_TO_CHARGEMANAG;
 import static com.example.huhep.litepaltest.BaseActivity.REQUEST_FROM_MAINFRAGMENT_TO_NEWROOM_FOR_NEWROOM;
+import static com.example.huhep.litepaltest.BaseActivity.REQUEST_FROM_MAINFRAGMENT_TO_NEWROOM_FOR_REVERROOM;
+import static com.example.huhep.litepaltest.bean.Charge.TYPE_LIVE_IN;
+import static com.example.huhep.litepaltest.bean.Charge.TYPE_MOVE_OUT;
 
 public class RoomFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
@@ -173,7 +166,7 @@ public class RoomFragment extends Fragment {
                 viewHolder.paidInWeChatTextView.setVisibility(View.GONE);
             }
             viewHolder.itemView.setOnCreateContextMenuListener((menu, v, menuInfo) -> {
-                if (lastCharge==null || !lastCharge.haspainOnWechat()) menu.add("已经微信支付了");
+                if (lastCharge == null || !lastCharge.haspainOnWechat()) menu.add("已经微信支付了");
                 else menu.add("取消微信支付状态");
                 menu.add("编辑房间信息");
                 menu.add("编辑费用类型");
@@ -230,10 +223,10 @@ public class RoomFragment extends Fragment {
         MyRoomFragmentRecyclerAdapter.ViewHolder viewHolder = (MyRoomFragmentRecyclerAdapter.ViewHolder) recyclerView.findViewHolderForAdapterPosition(adapter.getmPosition());
         Charge charge = adapter.lastChargeList.get(adapter.getmPosition());
         Room room = adapter.roomList.get(adapter.getmPosition());
-        if (room==null) return false;
+        if (room == null) return false;
         switch (item.getTitle().toString()) {
             case "已经微信支付了":
-                if (charge == null ){
+                if (charge == null) {
                     BaseActivity.show("请先生成账单");
                     break;
                 }
@@ -242,7 +235,7 @@ public class RoomFragment extends Fragment {
                 charge.setPaidOnWechat(true).save();
                 break;
             case "取消微信支付状态":
-                if (charge == null ){
+                if (charge == null) {
                     BaseActivity.show("请先生成账单");
                     break;
                 }
@@ -251,11 +244,9 @@ public class RoomFragment extends Fragment {
                 break;
 
             case "退房":
-                viewHolder.makeItOccupy(false);
                 moveOut(room);
                 break;
             case "出租":
-                viewHolder.makeItOccupy(true);
                 liveIn(room);
                 break;
             case "删除房间":
@@ -292,24 +283,82 @@ public class RoomFragment extends Fragment {
     private void toOpenNewRoomActivity(Room room) {
         Intent intent = new Intent(getContext(), NewRoomActivity.class);
         intent.putExtra(BaseActivity.ROOM_ID, room.getId());
-        startActivityForResult(intent,BaseActivity.REQUEST_FROM_MAINFRAGMENT_TO_NEWROOM_FOR_REVERROOM);
+        startActivityForResult(intent, BaseActivity.REQUEST_FROM_MAINFRAGMENT_TO_NEWROOM_FOR_REVERROOM);
     }
 
     private void liveIn(Room room) {
-        room.setOccupy(true);
-        room.setTimeToLiveIn(System.currentTimeMillis());
-        room.save();
-        adapter.notifyDataSetChanged();
         Intent intent = new Intent(getContext(), NewRoomActivity.class);
         intent.putExtra(BaseActivity.ROOM_ID, room.getId());
-        startActivityForResult(intent,REQUEST_FROM_MAINFRAGMENT_TO_NEWROOM_FOR_NEWROOM);
+        intent.putExtra(BaseActivity.FORCE_TO_TRUE, true);
+        startActivityForResult(intent, REQUEST_FROM_MAINFRAGMENT_TO_NEWROOM_FOR_REVERROOM);
     }
 
     private void moveOut(Room room) {
+        Charge lastCharge = adapter.lastChargeList.get(adapter.mPosition);
+        Charge moveOutCharge = new Charge();
+        moveOutCharge.setChargeType(TYPE_MOVE_OUT);
+        moveOutCharge.setRoomId(room.getId());
+        if (lastCharge == null) {
+            makeItMoveOut(room,moveOutCharge);
+            return;
+        }
+        SparseArray<Bill> usedDegreeBill = new SparseArray<>();
+        SparseArray<EditText> usedDegreeEditText = new SparseArray<>();
+        int index = 0;
+        LinearLayout linearLayout = new LinearLayout(getContext());
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        List<Bill> usedBillList = lastCharge.getUsedBillList();
+        for (Bill usedBill : usedBillList) {
+            if (usedBill.getbillType().isChargeOnDegree()) {
+                usedDegreeBill.append(index++, usedBill);
+                EditText editText = new EditText(getContext());
+                editText.setHint("请输入" + usedBill.getbillType().getBillTypeName() + "最后读数");
+                editText.setMaxLines(1);
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-1, -2);
+                layoutParams.leftMargin = 20;
+                layoutParams.rightMargin = 20;
+                editText.setLayoutParams(layoutParams);
+                linearLayout.addView(editText);
+                usedDegreeEditText.append(index - 1, editText);
+            }
+        }
+        if (usedDegreeBill.size() == 0) {
+            makeItMoveOut(room,moveOutCharge);
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext()).setTitle("正在退房")
+                .setMessage("要提供表底读数才能退房:")
+                .setPositiveButton("确定", (dialog, which) -> {
+                    for (int i = 0; i < usedDegreeBill.size(); i++) {
+                        Editable editable = usedDegreeEditText.get(i).getText();
+                        Bill bill = usedDegreeBill.get(i);
+                        if (TextUtils.isEmpty(editable)) {
+                            BaseActivity.show("表底不能为空");
+                            return;
+                        } else {
+                            Bill billCreated = moveOutCharge.createBill(bill, Double.valueOf(editable.toString()));
+                            billCreated.save();
+                        }
+                    }
+                    makeItMoveOut(room,moveOutCharge);
+                }).setNegativeButton("取消", (dialog, which) -> BaseActivity.show("取消了退房"));
+        if (linearLayout.getChildCount() > 0) {
+            builder.setView(linearLayout);
+        }
+        builder.show();
+    }
+
+    private void makeItMoveOut(Room room,Charge moveOutCharge) {
         room.setOccupy(false);
         room.setTimeToMoveOut(System.currentTimeMillis());
         room.save();
+        moveOutCharge.createDescrib();
+        moveOutCharge.save();
         adapter.notifyDataSetChanged();
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity.getBillManageFragment()!=null)
+            activity.getBillManageFragment().setupView();
     }
 
     private void deleteRoom(Room room) {
@@ -333,7 +382,10 @@ public class RoomFragment extends Fragment {
                     LitePal.deleteAll(Bill.class, "roomId=?", String.valueOf(room.getId()));
                     roomList.remove(room);
                     adapter.notifyItemRemoved(adapter.mPosition);
-                    BaseActivity.show(room.getRoomNum()+"删除成功");
+                    BaseActivity.show(room.getRoomNum() + "删除成功");
+                    MainActivity activity = (MainActivity) getActivity();
+                    if (activity.getBillManageFragment()!=null)
+                        activity.getBillManageFragment().setupView();
                 })
                 .setNegativeButton("取消", (dialog, which) -> BaseActivity.show("取消删除房间:" + room.getRoomNum()))
                 .show();
@@ -348,6 +400,17 @@ public class RoomFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        getActivity().getSupportFragmentManager().getFragments().get(0).onActivityResult(requestCode,resultCode,data);
+        switch (requestCode) {
+            case REQUEST_FROM_MAINFRAGMENT_TO_NEWROOM_FOR_REVERROOM:
+                if (resultCode == BaseActivity.RESULT_FROM_NEWROOM_TO_MAINFRAGMENT) {
+                    Room room = LitePal.find(Room.class, adapter.roomList.get(adapter.getmPosition()).getId());
+                    adapter.roomList.set(adapter.getmPosition(), room);
+                    adapter.notifyDataSetChanged();
+                    MainActivity activity = (MainActivity) getActivity();
+                    if (activity.getBillManageFragment()!=null)
+                        activity.getBillManageFragment().setupView();
+                }
+        }
+        getActivity().getSupportFragmentManager().getFragments().get(0).onActivityResult(requestCode, resultCode, data);
     }
 }

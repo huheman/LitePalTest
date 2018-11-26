@@ -1,13 +1,15 @@
 package com.example.huhep.litepaltest;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
-import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.huhep.litepaltest.bean.Bill;
 import com.example.huhep.litepaltest.bean.BillType;
@@ -15,17 +17,11 @@ import com.example.huhep.litepaltest.bean.Charge;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.bean.RoomSet;
 import com.example.huhep.litepaltest.fragments.BillManageFragment;
-import com.example.huhep.litepaltest.fragments.CreateBillFragment;
 import com.example.huhep.litepaltest.fragments.MainFragment;
-import com.example.huhep.litepaltest.fragments.PreviewDetailFragment;
 import com.example.huhep.litepaltest.fragments.PreviewFragment;
-import com.example.huhep.litepaltest.fragments.RoomFragment;
 import com.example.huhep.litepaltest.utils.Util;
 
 import org.litepal.LitePal;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -75,8 +71,8 @@ public class MainActivity extends BaseActivity {
                 LitePal.deleteAll(Charge.class);
                 LitePal.deleteAll(Bill.class);
                 LitePal.deleteAll(RoomSet.class);
-                LitePal.deleteAll(Room.class);
                 LitePal.deleteAll(BillType.class);
+                LitePal.deleteAll(Room.class);
                 activity.mainFragment.setupTheRooms();
                 break;
         }
@@ -93,11 +89,15 @@ public class MainActivity extends BaseActivity {
     private MainFragment mainFragment;
     private BillManageFragment billManageFragment;
     private PreviewFragment previewFragment;
-
-
     @BindView(R.id.navigation)
     BottomNavigationView navigationView;
 
+    public BottomNavigationView getNavigationView() {
+        return navigationView;
+    }
+    public BillManageFragment getBillManageFragment() {
+        return billManageFragment;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -118,6 +118,17 @@ public class MainActivity extends BaseActivity {
             }
         });
         fragmentManager.beginTransaction().add(R.id.main_constraintLayout, mainFragment).show(mainFragment).commit();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter usbIF = new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     public void reflashBillManageFragment(long roomId) {

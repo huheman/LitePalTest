@@ -137,6 +137,10 @@ public class Util {
         return "roomId:" + room.getId() + "_billTypeId:" + billType.getId();
     }
 
+    public static String getSPName(long roomId, long billTypeId) {
+        return "roomId:" + roomId + "_billTypeId:" + billTypeId;
+    }
+
     public static List<BillType> getAllBillTypeOf(long roomid) {
         if (roomid == -1) {
             return LitePal.where("belongTo=?", String.valueOf(roomid)).find(BillType.class);

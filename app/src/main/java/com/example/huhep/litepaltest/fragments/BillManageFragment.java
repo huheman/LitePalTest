@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.InputType;
@@ -18,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,6 +28,7 @@ import android.widget.TextView;
 import com.example.huhep.litepaltest.BaseActivity;
 import com.example.huhep.litepaltest.ChargeManageActivity;
 import com.example.huhep.litepaltest.CustomToolbar;
+import com.example.huhep.litepaltest.MainActivity;
 import com.example.huhep.litepaltest.R;
 import com.example.huhep.litepaltest.bean.Charge;
 import com.example.huhep.litepaltest.bean.Room;
@@ -38,6 +41,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 
 import static com.example.huhep.litepaltest.BaseActivity.REQUEST_FROM_BILLMANAGE_TO_CHARGEMANAGE;
@@ -172,6 +176,7 @@ public class BillManageFragment extends Fragment {
     }
 
     public void showViewPagerSelectRoom(long roomIdToShow) {
+        if (roomIdToShow<=0) return;
         for (int i = 0; i < roomList.size(); i++) {
             if (roomList.get(i).getId()==roomIdToShow){
                 viewPager.setCurrentItem(i);
@@ -264,6 +269,12 @@ public class BillManageFragment extends Fragment {
 
     public ViewPager getViewPager() {
         return viewPager;
+    }
+
+    @OnClick(R.id.chargemanage_createBillsButton)
+    public void toCreateView(View view) {
+        MainActivity activity = (MainActivity) getActivity();
+        activity.getNavigationView().setSelectedItemId(R.id.navigation_output);
     }
 
 }

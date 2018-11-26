@@ -1,18 +1,12 @@
 package com.example.huhep.litepaltest;
 
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -27,8 +21,6 @@ import com.example.huhep.litepaltest.utils.Util;
 import org.litepal.LitePal;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -77,6 +69,7 @@ public class NewRoomActivity extends BaseActivity {
     private String roomSetNameText = "";
     private boolean isOccupy = true;
     private boolean spinnerIsNull = false;
+    private List<RoomSet> roomSets;
     long roomId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +87,7 @@ public class NewRoomActivity extends BaseActivity {
     private void getDataFromIntent() {
         Intent intent = getIntent();
         roomId = intent.getLongExtra(BaseActivity.ROOM_ID, -1);
+        boolean forceToTrue = intent.getBooleanExtra(BaseActivity.FORCE_TO_TRUE, false);
         if (roomId!=-1) {
             Room room = LitePal.find(Room.class, roomId);
             userNameEditText = room.getUsername();
@@ -102,6 +96,7 @@ public class NewRoomActivity extends BaseActivity {
             phoneNumberEditText = room.getTel();
             roomSetNameText = Util.getRoomSetFromId(room.getRoomSet_id()).getRoomSetName();
             isOccupy = room.isOccupy();
+            if (forceToTrue) isOccupy = true;
             roomnumber.setFocusable(false);
             roomnumber.getEditText().setTextColor(getResources().getColor(R.color.deepDark));
             deposit.getEditText().requestFocus();
@@ -156,11 +151,7 @@ public class NewRoomActivity extends BaseActivity {
 
             @Override
             public void afterEditTextInputChanged(MessageCollector messageCollector,String s) {
-                if (roomnumber.getEditText().getText().length() == 0||spinnerIsNull) {
-                    newRoomButton.setEnabled(false);
-                } else {
-                    newRoomButton.setEnabled(true);
-                }
+                setNewRoomButtonEnable();
             }
 
             @Override
@@ -184,11 +175,7 @@ public class NewRoomActivity extends BaseActivity {
         EditText editText = roomnumber.getEditText();
         editText.setInputType(InputType.TYPE_CLASS_TEXT);
         editText.setText(roomNumberEditText);
-        if (spinnerIsNull || TextUtils.isEmpty(roomNumberEditText))
-            newRoomButton.setEnabled(false);
-         else
-            newRoomButton.setEnabled(true);
-
+        setNewRoomButtonEnable();
         roomnumber.setTipsDrawable(android.R.color.transparent);
 
         deposit.getTextView().setText("押金");
@@ -208,6 +195,13 @@ public class NewRoomActivity extends BaseActivity {
         isOccupyCheckBox.setChecked(isOccupy);
     }
 
+    private void setNewRoomButtonEnable() {
+        if (roomSets.size()==0 || TextUtils.isEmpty(roomnumber.getEditText().getText()))
+            newRoomButton.setEnabled(false);
+        else
+            newRoomButton.setEnabled(true);
+    }
+
     private void setupToolbar() {
         toolbar.setTitle("新增房间");
         toolbar.getToolbar().setNavigationIcon(R.drawable.ic_back);
@@ -215,17 +209,13 @@ public class NewRoomActivity extends BaseActivity {
     }
 
     private void setupSpinner() {
-        List<RoomSet> roomSets = LitePal.findAll(RoomSet.class);
+        roomSets = LitePal.findAll(RoomSet.class);
         List<String> roomSetNames = new ArrayList<>();
         for (RoomSet roomSet : roomSets) {
             roomSetNames.add(roomSet.getRoomSetName());
         }
-        if (roomSetNames.size() == 0) {
+        if (roomSetNames.size() == 0)
             roomSetNames.add("请新建一个组别");
-            spinnerIsNull = true;
-        } else {
-            spinnerIsNull = false;
-        }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, roomSetNames);
         roomSetSpinner.setAdapter(adapter);
@@ -235,7 +225,7 @@ public class NewRoomActivity extends BaseActivity {
         }
         if (i<0) i = 0;
         roomSetSpinner.setSelection(i);
-
+        setNewRoomButtonEnable();
     }
 
     @OnClick(R.id.newroom_newRoomButton)
@@ -249,10 +239,13 @@ public class NewRoomActivity extends BaseActivity {
         long roomSetId = LitePal.where("roomSetName=?", roomSetSpinner.getSelectedItem().toString())
                 .find(RoomSet.class).get(0).getId();
         room.setRoomSet_id(roomSetId);
-        room.setOccupy(isOccupyCheckBox.isChecked());
-        if (room.isOccupy())    room.setTimeToLiveIn(System.currentTimeMillis());
-        else room.setTimeToMoveOut(System.currentTimeMillis());
-
+        if (!isOccupyCheckBox.isChecked() && room.isOccupy()) {
+            BaseActivity.show("请从主页面中选择退房");
+        } else {
+            room.setOccupy(isOccupyCheckBox.isChecked());
+            if (room.isOccupy())    room.setTimeToLiveIn(System.currentTimeMillis());
+            else room.setTimeToMoveOut(System.currentTimeMillis());
+        }
         if (room.save()) {
             BaseActivity.show("房间创建/修改成功");
         } else {

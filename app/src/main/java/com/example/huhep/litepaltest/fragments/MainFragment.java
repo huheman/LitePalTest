@@ -237,9 +237,6 @@ public class MainFragment extends Fragment {
                 setupTheRooms();
                 break;
             case BaseActivity.REQUEST_FROM_MAINFRAGMENT_TO_CHARGEMANAG:
-                if (mainFragmentlistener!=null) mainFragmentlistener.onNewRoomCreated();
-                break;
-            case BaseActivity.REQUEST_FROM_MAINFRAGMENT_TO_NEWROOM_FOR_REVERROOM:
                 setupTheRooms();
                 if (mainFragmentlistener!=null) mainFragmentlistener.onNewRoomCreated();
                 break;

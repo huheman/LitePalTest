@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,13 +9,16 @@
 
     <com.example.huhep.litepaltest.CustomToolbar
         android:id="@+id/managebillfragment_toolbar"
+        app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/managebillfragment_coordainationlayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        app:layout_constraintTop_toBottomOf="@id/managebillfragment_toolbar"
+        app:layout_constraintBottom_toTopOf="@id/chargemanage_createBillsButton"
+        android:layout_height="0dp">
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
@@ -41,6 +44,15 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
     </android.support.design.widget.CoordinatorLayout>
 
+    <Button
+        android:id="@+id/chargemanage_createBillsButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="生成账单"
+        style="@style/highlightButtonTheme"
+        android:layout_margin="8dp"
+        />
     <TextView
         android:id="@+id/managebillfragment_noRoomTextView"
         android:layout_width="match_parent"
@@ -50,4 +62,4 @@
         android:text="未找到房间"
         android:textSize="@dimen/textsize"
         android:textColor="@color/deepDeepDark"/>
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>
