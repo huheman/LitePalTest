@@ -194,10 +194,11 @@ public class CreateBillFragment extends Fragment {
             if (lastBill != null) {
                 if (charge != null && charge.getCreateDateToString().equalsIgnoreCase(Util.getWhen())) {
                     preDegree = String.valueOf(lastBill.getFromDegree());
+                    if(charge.getChargeType() == Charge.TYPE_MOVE_OUT)
+                        preDegree= String.valueOf(lastBill.getToDegree());
                 } else {
                     preDegree = String.valueOf(lastBill.getToDegree());
                 }
-                editor.putString(Util.getSPName(room, billType) + "_pre", preDegree).apply();
             }
         }
         if (lastBill != null&&charge != null && charge.getChargeType() == Charge.TYPE_MOVE_OUT) {
@@ -206,6 +207,7 @@ public class CreateBillFragment extends Fragment {
         oldBillCollector.setPreDateTips(tips);
         oldBillCollector.getEditText().setHint("请双击这里填" + billType.getBillTypeName() + "表底");
         oldBillCollector.getEditText().setText(preDegree);
+        editor.putString(Util.getSPName(room, billType) + "_pre", preDegree).apply();
 
         CurrentMessageCollector currentMessageCollector = new CurrentMessageCollector(getContext(), null);
         currentMessageCollector.setTipsDrawable(icon);
@@ -213,14 +215,14 @@ public class CreateBillFragment extends Fragment {
         String thisDegree = sharedPreferences.getString(Util.getSPName(room, billType), "");
         if (lastBillForNow != null) {
             currentMessageCollector.setHint("修改本月数据");
-            if (thisDegree.isEmpty()) {
+            if (thisDegree.isEmpty())
                 thisDegree = String.valueOf(lastBillForNow.getToDegree());
-                editor.putString(Util.getSPName(room, billType), String.valueOf(thisDegree)).apply();
-            }
-            if (charge.getChargeType()==Charge.TYPE_MOVE_OUT)
-                thisDegree = "";
         }
+        if (charge != null && charge.getChargeType() == Charge.TYPE_MOVE_OUT)
+            thisDegree = "";
+
         currentMessageCollector.getEditText().setText(thisDegree);
+        editor.putString(Util.getSPName(room, billType), String.valueOf(thisDegree)).apply();
         currentMessageCollector.getEditText().setHint("输入" + room.getRoomNum() + "房" + billType.getBillTypeName() + "读数");
         currentMessageCollector.requestFocus();
         currentMessageCollector.setListener(new MessageCollector.MessageCollectorListener() {
@@ -234,8 +236,8 @@ public class CreateBillFragment extends Fragment {
 
             @Override
             public void onFinishEditing(MessageCollector messageCollector) {
-                if (BillManageFragment.roomsToShow != null && !BillManageFragment.roomsToShow.contains(room.getId()))
-                    BillManageFragment.roomsToShow.add(room.getId());
+                if (!BillManageFragment.getRoomsToShow().contains(room.getId()))
+                    BillManageFragment.getRoomsToShow().add(room.getId());
             }
 
             @Override
@@ -412,8 +414,8 @@ public class CreateBillFragment extends Fragment {
 
             @Override
             public void onFinishEditing(MessageCollector messageCollector) {
-                if (BillManageFragment.roomsToShow != null && !BillManageFragment.roomsToShow.contains(room.getId()))
-                    BillManageFragment.roomsToShow.add(room.getId());
+                if (!BillManageFragment.getRoomsToShow().contains(room.getId()))
+                    BillManageFragment.getRoomsToShow().add(room.getId());
             }
 
             @Override

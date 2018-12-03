@@ -236,8 +236,10 @@ public class Util {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(when);
         calendar.add(Calendar.MONTH, 1);
-        if (calendar.get(Calendar.MONTH) == 12)
+        if (calendar.get(Calendar.MONTH) == 12){
+            Log.d(TAG, "getNextMonty: ");
             calendar.set(Calendar.MONTH, 0);
+        }
         return getWhen(calendar.getTimeInMillis());
     }
 
@@ -290,5 +292,27 @@ public class Util {
         return totalDegree;
     }
 
+    public static int mmToPix(double mm) {
+        return inchToPix(mmToInch(mm));
+    }
+
+    public static double mmToInch(double mm) {
+        return mm / 25.4;
+    }
+
+    public static int inchToPix(double inch) {
+        double dpi = BaseActivity.getContext().getResources().getInteger(R.integer.imageDPI);
+        return (int) (inch * dpi);
+    }
+
+    public static long getMinSearchCreateTime(long maxSearchCreateTime){
+        long millionsFromString = Util.getMillionsFromString(getWhen(maxSearchCreateTime));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(millionsFromString);
+        int monthToShow = BaseActivity.getContext().getResources().getInteger(R.integer.MonthOnceShown);
+        calendar.add(Calendar.MONTH, -monthToShow);
+        calendar.add(Calendar.DAY_OF_MONTH, -15);
+        return calendar.getTimeInMillis();
+    }
 }
 

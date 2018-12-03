@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -47,6 +48,7 @@ public class PreviewDetailFragment extends Fragment {
 
     private OnCreatedViewFinishedListener onCreatedViewFinishedListener;
     private Unbinder unbinder;
+    private List<Room> roomList;
 
     public void setOnViewHolderClickedListener(PreviewDetailFragment.onViewHolderClickedListener onViewHolderClickedListener) {
         this.onViewHolderClickedListener = onViewHolderClickedListener;
@@ -122,6 +124,7 @@ public class PreviewDetailFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull PreviewDetailRecyclerAdapter.ViewHolder holder, int position) {
+            holder.linearLayout.removeAllViews();
             if (makeItTogether) {
                 holder.roomNumTextView.setText("总体");
                 BillFormater billFormater = new BillFormater(PreviewFragment.billList);
@@ -130,7 +133,7 @@ public class PreviewDetailFragment extends Fragment {
             } else {
                 Room room = roomList.get(position);
                 holder.roomNumTextView.setText(room.getRoomNum());
-                holder.setCheck(BillManageFragment.roomsToShow != null && BillManageFragment.roomsToShow.contains(room.getId()));
+                holder.setCheck(BillManageFragment.getRoomsToShow().contains(room.getId()));
                 Charge charge = PreviewFragment.chargeMap.get(room.getId());
                 for (ItemComponents itemComponents : charge.getItemComponentsList(getContext())) {
                     holder.linearLayout.addView(itemComponents);
@@ -143,14 +146,12 @@ public class PreviewDetailFragment extends Fragment {
                         onViewHolderClickedListener.onViewHolderClicked(room.getId());
                 });
                 holder.roomNumTextView.setOnClickListener(v -> {
-                    if (BillManageFragment.roomsToShow != null) {
-                        if (BillManageFragment.roomsToShow.contains(room.getId())) {
-                            BillManageFragment.roomsToShow.remove(room.getId());
-                            holder.setCheck(false);
-                        } else {
-                            BillManageFragment.roomsToShow.add(room.getId());
-                            holder.setCheck(true);
-                        }
+                    if (BillManageFragment.getRoomsToShow().contains(room.getId())) {
+                        BillManageFragment.getRoomsToShow().remove(room.getId());
+                        holder.setCheck(false);
+                    } else {
+                        BillManageFragment.getRoomsToShow().add(room.getId());
+                        holder.setCheck(true);
                     }
                 });
             }
@@ -169,18 +170,21 @@ public class PreviewDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_preview_detail, container, false);
         unbinder = ButterKnife.bind(this, view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        setupView();
+        return view;
+    }
 
+    private void setupView() {
         boolean makeItTogether = false;
-        List<Room> roomList = null;
         if (roomSetId != -1) {
-            roomList = LitePal.where("roomSetId=? and isOccupy=1", String.valueOf(roomSetId)).find(Room.class);
+            roomList = LitePal.select("id,roomNum").where("roomSetId=? and isOccupy=1", String.valueOf(roomSetId)).find(Room.class);
+            Util.sort(roomList);
         } else {
             makeItTogether = true;
         }
         PreviewDetailRecyclerAdapter previewDetailRecyclerAdapter = new PreviewDetailRecyclerAdapter(roomList, makeItTogether);
         recyclerView.setAdapter(previewDetailRecyclerAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        return view;
     }
 
     @Override
@@ -188,5 +192,4 @@ public class PreviewDetailFragment extends Fragment {
         super.onDestroyView();
         unbinder.unbind();
     }
-
 }

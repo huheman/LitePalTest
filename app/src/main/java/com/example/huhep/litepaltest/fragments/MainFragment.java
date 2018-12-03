@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -19,12 +20,15 @@ import android.widget.TextView;
 
 import com.example.huhep.litepaltest.BaseActivity;
 import com.example.huhep.litepaltest.ChargeManageActivity;
+import com.example.huhep.litepaltest.CustomToolbar;
+import com.example.huhep.litepaltest.MainActivity;
 import com.example.huhep.litepaltest.NewRoomActivity;
 import com.example.huhep.litepaltest.R;
 import com.example.huhep.litepaltest.bean.MemoTotal;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.bean.RoomSet;
 import com.example.huhep.litepaltest.components.MainToolBar;
+import com.example.huhep.litepaltest.utils.Util;
 
 import org.litepal.LitePal;
 import org.litepal.crud.callback.FindMultiCallback;
@@ -52,6 +56,7 @@ public class MainFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     private String preRoomSetName="";
+    private List<Fragment> fragments;
     private Unbinder bind;
     private MainFrgmentListener mainFragmentlistener;
     @BindView(R.id.mainfragment_memolistview)
@@ -75,7 +80,7 @@ public class MainFragment extends Fragment {
     private MainToolBar.MainToolBarListener listener=new MainToolBar.MainToolBarListener() {
         @Override
         public void onSearchClicked() {
-
+            ((MainActivity) getActivity()).findCharge();
         }
 
         @Override
@@ -95,6 +100,29 @@ public class MainFragment extends Fragment {
         public void onnewMemoClicked() {
 
         }
+
+        @Override
+        public void onSpanClicked() {
+            mainToolBar.getToolbar().getMenu().findItem(R.id.mainfragment_toolbar_span).setVisible(false);
+            mainToolBar.getToolbar().getMenu().findItem(R.id.mianfragment_toolbar_screch).setVisible(true);
+            if (fragments != null) {
+                for (Fragment fragment : fragments) {
+                    ((RoomFragment) fragment).setSpan(true);
+                }
+            }
+        }
+
+        @Override
+        public void onScrechClicked() {
+            mainToolBar.getToolbar().getMenu().findItem(R.id.mainfragment_toolbar_span).setVisible(true);
+            mainToolBar.getToolbar().getMenu().findItem(R.id.mianfragment_toolbar_screch).setVisible(false);
+            if (fragments != null) {
+                for (Fragment fragment : fragments) {
+                    ((RoomFragment) fragment).setSpan(false);
+                }
+            }
+        }
+
     };
 
     public MainFragment() {
@@ -160,7 +188,7 @@ public class MainFragment extends Fragment {
 
     public void setupTheRooms() {
         List<RoomSet> roomSets = LitePal.findAll(RoomSet.class);
-        List<Fragment> fragments = new ArrayList<>();
+        fragments = new ArrayList<>();
         List<String> titles=new ArrayList<>();
         if (roomSets.size()<=1) tabLayout.setVisibility(View.GONE);
         else tabLayout.setVisibility(View.VISIBLE);

@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">LitePalTest</string>
+    <string name="app_name">租房管理</string>
     <string name="roomtips">请输入房间号</string>
     <string name="watertips">请输入水表读数</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">租房管理</string>
     <string name="title_home">概况</string>
     <string name="title_analize">分析</string>
     <string name="title_new">新建</string>

@@ -151,21 +151,6 @@ public class Bill extends LitePalSupport {
 
             toDate = System.currentTimeMillis();
         }
-        /*else{
-            Charge charge = LitePal.find(Charge.class, lastBill.getCharge_Id());
-            if (charge!=null && charge.getCreateDateToString().equalsIgnoreCase(Util.getWhen()))
-                fromDate = lastBill.fromDate;
-            else{
-                fromDate = lastBill.toDate;
-            }
-        }
-        if (billType.isChargeOnDegree()) {
-            toDate = System.currentTimeMillis();
-        } else {
-            if (fromDate == 0) fromDate = System.currentTimeMillis();
-            String nextMonty = Util.getNextMonty(System.currentTimeMillis());
-            toDate = Util.getMillionsFromString(nextMonty);
-        }*/
     }
 
     public double howMuch() {
@@ -186,41 +171,62 @@ public class Bill extends LitePalSupport {
         return billType;
     }
 
+    public String getDetailForImage() {
+        if (getType()==BILL_NOT_DEFINE)
+            return getTips();
+        else if (getType() == BILL_TOO_MUCH) {
+            return getNormalDetail();
+        }
+            return getDetail();
+    }
+
+
 
     public String getDetail() {
         BillType billType = getbillType();
         if (billType.isChargeOnDegree()) {
-            String toDegreeFormat = String.format("%.0f", toDegree);
-            String fromDegreeFormat = String.format("%.0f", fromDegree);
             switch (getType()) {
                 case BILL_ALL_OK:
                     return getNormalDetail();
                 case BILL_SET_BASEDEGREE:
-                    return "把" + billType.getBillTypeName() + "的底设置为" + toDegreeFormat;
+                    return getTips();
                 case BILL_NOT_DEFINE:
-                    return "这个月没收" + billType.getBillTypeName() + "\n读数依然为" + fromDegree;
+                    return getTips();
                 case BILL_ERROR:
-                    return "本月读数" + toDegreeFormat + "小于上月读数" + fromDegreeFormat + ",\n请返回修改！";
+                    return getTips();
                 case BILL_TOO_MUCH:
                     String normalDetail = getNormalDetail();
-                    return normalDetail + "\n上次数据是" + getLastBill().howMuchDegree() + "度，\n差距很大，请仔细确认";
+                    return normalDetail + "\n"+getTips();
                 case BILL_NOT_INIT:
-                    return "还没设置读数，\n请前往“新建”标签设置读数";
+                    return getTips();
                 default:
                     return "未知错误";
             }
         } else {
-            int month = Util.howManyMonth(toDate, fromDate);
-            return month + "个月" + billType.getBillTypeName() + ": " + howMuch() + " 元";
+            return  billType.getBillTypeName() + ": " + howMuch() + " 元";
         }
     }
 
-    public boolean isReadyToRent() {
-        int howManyMonth = Util.howManyMonth(fromDate, System.currentTimeMillis());
-        if (howManyMonth > 0) {
-            return false;
+    public String getTips() {
+        BillType billType = getbillType();
+        String toDegreeFormat = String.format("%.0f", toDegree);
+        String fromDegreeFormat = String.format("%.0f", fromDegree);
+        switch (getType()) {
+            case BILL_ALL_OK:
+                return "";
+            case BILL_SET_BASEDEGREE:
+                return "把" + billType.getBillTypeName() + "的底设置为" + toDegreeFormat;
+            case BILL_NOT_DEFINE:
+                return "这个月没收" + billType.getBillTypeName() + "\n读数依然为" + fromDegree;
+            case BILL_ERROR:
+                return "本月读数" + toDegreeFormat + "小于上月读数" + fromDegreeFormat + ",\n请返回修改！";
+            case BILL_TOO_MUCH:
+                return "上次数据是" + getLastBill().howMuchDegree() + "度，\n差距很大，请仔细确认";
+            case BILL_NOT_INIT:
+                return "还没设置读数，\n请前往“新建”标签设置读数";
+            default:
+                return "未知错误";
         }
-        return true;
     }
 
     public Bill getLastBill() {
@@ -260,7 +266,7 @@ public class Bill extends LitePalSupport {
         return false;
     }
 
-    private String getNormalDetail() {
+    public String getNormalDetail() {
         BillType billType = getbillType();
         String toDegreeFormat = String.format("%.0f", toDegree);
         String fromDegreeFormat = String.format("%.0f", fromDegree);

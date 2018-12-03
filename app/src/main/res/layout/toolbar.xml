@@ -22,9 +22,4 @@
         android:textSize="18dp"
         android:textColor="@color/deepDeepDark"
         android:gravity="center"/>
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/divediViewHeight"
-        android:src="@color/deepDark"
-        app:layout_constraintBottom_toBottomOf="@id/toolbar"/>
 </android.support.constraint.ConstraintLayout>

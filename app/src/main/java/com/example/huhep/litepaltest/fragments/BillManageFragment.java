@@ -57,6 +57,7 @@ import static com.example.huhep.litepaltest.fragments.CreateBillFragment.STATE_S
 public class BillManageFragment extends Fragment {
     @BindView(R.id.managebillfragment_toolbar)
     CustomToolbar toolbar;
+
     @BindView(R.id.managebillfragment_tabLayout)
     TabLayout tabLayout;
     @BindView(R.id.managebillfragment_viewpager)
@@ -73,7 +74,6 @@ public class BillManageFragment extends Fragment {
     public static List<Long> roomsToShow;
     private FragmentStatePagerAdapter adapter;
     private List<CreateBillFragment> fragmentList;
-    private static final String TAG = "PengPeng";
 
     public BillManageFragment() {
     }
@@ -97,28 +97,27 @@ public class BillManageFragment extends Fragment {
         //每次刷新前都检查下当前时间是否为所在月份，不在则把之前的数据清零
         SharedPreferences sp = BaseActivity.getSP();
         String whenFromSP = sp.getString(BaseActivity.WHEN_KEY_FOR_SHP, "");
-        if (roomListFromOut.size()>1 && !whenFromSP.equalsIgnoreCase(Util.getWhen())){
+        if (roomListFromOut.size() > 1 && !whenFromSP.equalsIgnoreCase(Util.getWhen())) {
             SharedPreferences.Editor editor = sp.edit();
             editor.clear();
             editor.putString(BaseActivity.WHEN_KEY_FOR_SHP, Util.getWhen());
             editor.apply();
         }
         //重置需要生成的列表
-        roomsToShow=new ArrayList<>();
         roomList = roomListFromOut;
         Util.sort(roomList);
-        if (roomList.size()==0) {
+        if (roomList.size() == 0) {
             coordinatorLayout.setVisibility(View.GONE);
             noRoomTextView.setVisibility(View.VISIBLE);
             return;
-        }else {
+        } else {
             noRoomTextView.setVisibility(View.GONE);
             coordinatorLayout.setVisibility(View.VISIBLE);
         }
-        if (roomList.size()==1) tabLayout.setVisibility(View.GONE);
+        if (roomList.size() == 1) tabLayout.setVisibility(View.GONE);
         else tabLayout.setVisibility(View.VISIBLE);
         fragmentList = getFragments();
-        adapter = new FragmentStatePagerAdapter(getChildFragmentManager()){
+        adapter = new FragmentStatePagerAdapter(getChildFragmentManager()) {
             @Override
             public int getCount() {
                 return roomList.size();
@@ -159,14 +158,11 @@ public class BillManageFragment extends Fragment {
         tabLayout.setupWithViewPager(viewPager);
         for (int i = 0; i < tabLayout.getTabCount(); i++) {
             tabLayout.getTabAt(i).setCustomView(R.layout.billmanagefragment_tablayout);
-            TextView textView =  tabLayout.getTabAt(i).getCustomView().findViewById(R.id.tab_textView);
+            TextView textView = tabLayout.getTabAt(i).getCustomView().findViewById(R.id.tab_textView);
             textView.setText(adapter.getPageTitle(i));
         }
     }
 
-    public void setRoomIdToShow(long roomIdToShow) {
-        this.roomIdToShow = roomIdToShow;
-    }
 
     @Override
     public void onResume() {
@@ -176,9 +172,11 @@ public class BillManageFragment extends Fragment {
     }
 
     public void showViewPagerSelectRoom(long roomIdToShow) {
-        if (roomIdToShow<=0) return;
+        if (roomIdToShow <= 0) return;
+        this.roomIdToShow = roomIdToShow;
+        if (viewPager==null) return;
         for (int i = 0; i < roomList.size(); i++) {
-            if (roomList.get(i).getId()==roomIdToShow){
+            if (roomList.get(i).getId() == roomIdToShow) {
                 viewPager.setCurrentItem(i);
                 return;
             }
@@ -187,10 +185,10 @@ public class BillManageFragment extends Fragment {
 
     private List<CreateBillFragment> getFragments() {
         List<CreateBillFragment> fragments = new ArrayList<>();
-        for (Room room : roomList){
+        for (Room room : roomList) {
             Charge lastCharge = room.getLastCharge();
-            if (lastCharge==null || !lastCharge.getCreateDateToString().equalsIgnoreCase(Util.getWhen()))
-                roomsToShow.add(room.getId());
+            if ((lastCharge == null || !lastCharge.getCreateDateToString().equalsIgnoreCase(Util.getWhen()))&&!getRoomsToShow().contains(room.getId()))
+                getRoomsToShow().add(room.getId());
             fragments.add(CreateBillFragment.newInstance(room));
         }
 
@@ -200,28 +198,27 @@ public class BillManageFragment extends Fragment {
 
     public void setupToolBar() {
         toolbar.getToolbar().getMenu().clear();
-        if (roomList.size()>1)
-            toolbar.getToolbar().getMenu().add("查找").setIcon(R.drawable.ic_search).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         toolbar.getToolbar().inflateMenu(R.menu.toobarmenu_createbillfragment);
         String roomNumInToolBar = "";
-        if (roomList.size()==1) roomNumInToolBar = roomList.get(0).getRoomNum()+"房";
-        toolbar.setTitle(roomNumInToolBar+Util.getWhen().substring(5)+"费用列表");
+        if (roomList.size() == 1) roomNumInToolBar = roomList.get(0).getRoomNum() + "房";
+        toolbar.setTitle(roomNumInToolBar + Util.getWhen().substring(5) + "费用列表");
         toolbar.getToolbar().setOnMenuItemClickListener(item -> {
             switch (item.getTitle().toString()) {
                 case "编辑费用类型":
-                    if (roomList==null||roomList.size()==0){
+                    if (roomList == null || roomList.size() == 0) {
                         BaseActivity.show("请先添加房间");
                         break;
                     }
                     long id = roomList.get(viewPager.getCurrentItem()).getId();
                     Intent intent = new Intent(getContext(), ChargeManageActivity.class);
                     intent.putExtra(BaseActivity.ROOM_ID, id);
-                    startActivityForResult(intent,REQUEST_FROM_BILLMANAGE_TO_CHARGEMANAGE);
+                    startActivityForResult(intent, REQUEST_FROM_BILLMANAGE_TO_CHARGEMANAGE);
                     break;
                 case "查找":
+                    if (roomList.size()<=1) break;
                     LinearLayout linearLayout = new LinearLayout(getContext());
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-1, -2);
-                    layoutParams.setMargins(64,0,64,0);
+                    layoutParams.setMargins(64, 0, 64, 0);
                     EditText editText = new EditText(getContext());
                     editText.setHint("请输入房间号");
                     editText.setMaxLines(1);
@@ -234,9 +231,9 @@ public class BillManageFragment extends Fragment {
                             .setPositiveButton("确定", (dialog, which) -> {
                                 String s = editText.getText().toString();
                                 if (s.isEmpty()) return;
-                                for (int i=0;i<roomList.size();i++) {
+                                for (int i = 0; i < roomList.size(); i++) {
                                     Room room = roomList.get(i);
-                                    if (s.equalsIgnoreCase(room.getRoomNum())){
+                                    if (s.equalsIgnoreCase(room.getRoomNum())) {
                                         viewPager.setCurrentItem(i);
                                         return;
                                     }
@@ -274,7 +271,18 @@ public class BillManageFragment extends Fragment {
     @OnClick(R.id.chargemanage_createBillsButton)
     public void toCreateView(View view) {
         MainActivity activity = (MainActivity) getActivity();
+        if (activity.getPreviewFragment() != null) {
+            activity.getPreviewFragment().setupBillList();
+            activity.getPreviewFragment().setupView();
+        }
         activity.getNavigationView().setSelectedItemId(R.id.navigation_output);
+    }
+
+    public static List<Long> getRoomsToShow() {
+        if (roomsToShow == null) {
+            roomsToShow=new ArrayList<>();
+        }
+        return roomsToShow;
     }
 
 }

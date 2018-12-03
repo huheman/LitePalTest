@@ -125,7 +125,8 @@ public class Room extends LitePalSupport implements Parcelable {
                 liveInCharge.save();
             }
         } else {
-            isOccupy = 2;
+            if (occupy) isOccupy = 1;
+            else isOccupy = 2;
         }
     }
 

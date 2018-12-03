@@ -60,7 +60,7 @@ public class RoomFragment extends Fragment {
     @BindView(R.id.vpfragment_textView)
     TextView textView;
     private Unbinder bind;
-
+    private boolean isSpan;
     public RoomFragment() {
     }
 
@@ -71,6 +71,13 @@ public class RoomFragment extends Fragment {
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public void setSpan(boolean span) {
+        isSpan = span;
+        if (recyclerView != null) {
+            recyclerView.getAdapter().notifyDataSetChanged();
+        }
     }
 
     class MyRoomFragmentRecyclerAdapter extends RecyclerSwipeAdapter<MyRoomFragmentRecyclerAdapter.ViewHolder> {
@@ -180,6 +187,17 @@ public class RoomFragment extends Fragment {
                 mPosition = position;
                 return false;
             });
+            viewHolder.itemView.setOnClickListener(v -> {
+                int roomPos = ((MainActivity) getActivity()).findRoomPos(room.getRoomNum());
+                ((MainActivity) getActivity()).refreshAnalyzeFragment(roomPos);
+            });
+            if (isSpan) {
+                viewHolder.detailTipsTextView.setVisibility(View.VISIBLE);
+                viewHolder.detailTextView.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.detailTipsTextView.setVisibility(View.GONE);
+                viewHolder.detailTextView.setVisibility(View.GONE);
+            }
         }
 
         @Override

@@ -6,9 +6,4 @@
         android:title="查找"
         android:icon="@drawable/ic_search"
         app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/createBill_operateBillType"
-        android:title="编辑费用类型"
-        android:icon="@drawable/ic_operater"
-        app:showAsAction="ifRoom" />
 </menu>

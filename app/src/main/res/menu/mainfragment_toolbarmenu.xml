@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/mainfragment_toolbar_span"
+        android:title="展开"
+        android:icon="@drawable/ic_span"
+        app:showAsAction="always"
+        />
+    <item android:id="@+id/mianfragment_toolbar_screch"
+        android:title="收缩"
+        android:icon="@drawable/ic_screch"
+        android:visible="false"
+        app:showAsAction="always"/>
+
     <item android:id="@+id/mainfragment_toolbar_newRoom"
         android:title="新增房间"
         android:icon="@drawable/ic_newroom"
@@ -10,7 +21,7 @@
         android:id="@+id/mainfragment_toolbar_searchroom"
         android:title="查找房间"
         android:icon="@drawable/ic_search"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/mainfragment_toolbar_chargemangment"
         android:title="费用管理"

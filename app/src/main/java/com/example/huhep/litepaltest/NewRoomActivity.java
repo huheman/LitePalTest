@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -63,7 +64,7 @@ public class NewRoomActivity extends BaseActivity {
     public static final String ROOMSETNAME = "roomsetname";
     public static final String OCCUPATION = "occupation";
     private String userNameEditText="";
-    private String depositEditText = "200";
+    private String depositEditText = "100";
     private String roomNumberEditText = "";
     private String phoneNumberEditText = "";
     private String roomSetNameText = "";

@@ -17,7 +17,7 @@
             android:id="@+id/roomitem_timeTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="账单日期：2018年1月1日"
+            android:text="账单日期：2018年1月12日"
             app:layout_constraintTop_toTopOf="@id/item_roomNameTextView"
             app:layout_constraintBottom_toBottomOf="@id/item_roomNameTipsTextView"
             app:layout_constraintEnd_toEndOf="parent"
@@ -113,19 +113,39 @@
             app:layout_constraintStart_toStartOf="parent"
             />
         <TextView
-            android:text="上次结账时间是2018年9月20日"
             android:id="@+id/item_detailTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/item_noteTextView"
             app:layout_constraintStart_toEndOf="@id/main_detailTipsTextView"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/item_codeTextView"
             android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"
             android:textColor="@color/deepDeepDark"
             android:padding="4dp"
             android:layout_marginEnd="20dp"
             />
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/item_codeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5m3daw"
+            app:layout_constraintTop_toBottomOf="@id/item_detailTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_margin="8dp"/>
+
+        <Button
+            android:id="@+id/item_shareBut"
+            android:visibility="gone"
+            android:layout_width="40dp"
+            android:layout_height="20dp"
+            style="@style/highlightButtonTheme"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_margin="8dp"
+            android:text="分享"/>
 </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>

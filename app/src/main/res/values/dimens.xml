@@ -9,7 +9,12 @@
     <dimen name="design_bottom_navigation_text_size" tools:override="true">10sp</dimen>
     <dimen name="design_bottom_navigation_active_text_size" tools:override="true">10sp</dimen>
     <dimen name="toolbar_height">66dp</dimen>
-    <dimen name="max_light">10000</dimen>
-    <dimen name="max_water">1000</dimen>
-    <dimen name="loopThroead">500.0</dimen>
+    <dimen name="titleTextSize">50dp</dimen>
+    <dimen name="primaryTextSize">30dp</dimen>
+    <dimen name="secondaryTextSize">20dp</dimen>
+    <integer name="imageDPI">300</integer>
+    <integer name="maxColumnForPDF">3</integer>
+    <dimen name="broder">1dp</dimen>
+    <integer name="MonthOnceShown">3</integer>
+
 </resources>

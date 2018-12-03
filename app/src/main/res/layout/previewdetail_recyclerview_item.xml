@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@color/textViewBackground"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/previewdetailitem_linearLayout">
+    >
 
     <TextView
         android:id="@+id/previewdetailitem_roomnum"
@@ -20,6 +20,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/previewdetailitem_linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
 
 

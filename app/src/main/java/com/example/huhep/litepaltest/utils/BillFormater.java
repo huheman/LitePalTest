@@ -43,11 +43,11 @@ public class BillFormater {
             List<Bill> billList = map.getValue();
             ItemComponents itemComponents = new ItemComponents(context, null);
             if (billList.get(0).getToDegree() != 0) {
-                itemComponents.setDuration("共计: " + Util.getTotalHowMuchOfBillList(billList) + " 元");
-                itemComponents.setDetail("共用: " + Util.getHowDegreeOfBillList(billList) + " 度");
+                itemComponents.setDuration("共计: " + String.format("%.2f",Util.getTotalHowMuchOfBillList(billList)) + " 元");
+                itemComponents.setDetail("共用: " + String.format("%.2f",Util.getHowDegreeOfBillList(billList)) + " 度");
             } else {
                 itemComponents.duration.setVisibility(View.GONE);
-                itemComponents.setDetail("共计：" + Util.getTotalHowMuchOfBillList(billList) + " 元");
+                itemComponents.setDetail("共计：" + String.format("%.2f",Util.getTotalHowMuchOfBillList(billList)) + " 元");
             }
             itemComponents.setTitle(map.getKey());
             componentsList.add(itemComponents);
@@ -60,7 +60,7 @@ public class BillFormater {
         ItemComponents totalComponents = new ItemComponents(context, null);
         totalComponents.setTitle("所有收费");
         totalComponents.duration.setVisibility(View.GONE);
-        totalComponents.setDetail(Util.getTotalHowMuchOfBillList(PreviewFragment.billList) + "元");
+        totalComponents.setDetail(String.format("%.2f",Util.getTotalHowMuchOfBillList(PreviewFragment.billList)) + "元");
         return totalComponents;
     }
 }
