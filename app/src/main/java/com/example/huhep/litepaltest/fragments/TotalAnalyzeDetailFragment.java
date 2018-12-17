@@ -19,6 +19,8 @@ import com.example.huhep.litepaltest.BaseActivity;
 import com.example.huhep.litepaltest.R;
 import com.example.huhep.litepaltest.bean.Bill;
 import com.example.huhep.litepaltest.bean.Charge;
+import com.example.huhep.litepaltest.bean.Room;
+import com.example.huhep.litepaltest.bean.RoomSet;
 import com.example.huhep.litepaltest.utils.BillFormater;
 import com.example.huhep.litepaltest.utils.Util;
 
@@ -40,8 +42,8 @@ import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
  * A simple {@link Fragment} subclass.
  */
 public class TotalAnalyzeDetailFragment extends Fragment {
-    Long maxCreateDate;
-    TotalAutoLoadAdapter adapter;
+
+
     @BindView(R.id.totalAnalyze_fragment_recyclerView)
     RecyclerView recyclerView;
     @BindView(R.id.totalAnalyze_fragment_textView)
@@ -49,6 +51,8 @@ public class TotalAnalyzeDetailFragment extends Fragment {
     @BindView(R.id.totalAnalyze_fragment_swipeRefreshLayout)
     SwipeRefreshLayout refreshLayout;
 
+    long currentDate;
+    TotalAutoLoadAdapter adapter;
     List<String> keyList;
     Map<String, List<Long>> keyMapChargeList;
 
@@ -68,7 +72,7 @@ public class TotalAnalyzeDetailFragment extends Fragment {
             holder.timeTV.setText(key);
             List<Bill> billList = new ArrayList<>();
             for (Long chargeId : chargeIdList)
-                billList.addAll(LitePal.where("charge_Id=?", chargeId + "").find(Bill.class));
+                billList.addAll(LitePal.where("chargeId=?", chargeId + "").find(Bill.class));
             HashMap<String, List<Bill>> billByName = new BillFormater(billList).getBillByName();
             holder.detailTV.setText("");
             for (String billTypeName : billByName.keySet()) {
@@ -127,7 +131,6 @@ public class TotalAnalyzeDetailFragment extends Fragment {
         }
 
     }
-
 
     static class TotalAutoLoadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private RecyclerView.Adapter analyzeAdapter;
@@ -222,7 +225,7 @@ public class TotalAnalyzeDetailFragment extends Fragment {
         return view;
     }
 
-    private void setupView() {
+    public void setupView() {
         initChargeList();
         adapter = new TotalAutoLoadAdapter(new TotalAnalyzeAdapter());
         recyclerView.setAdapter(adapter);
@@ -232,7 +235,7 @@ public class TotalAnalyzeDetailFragment extends Fragment {
             @Override
             void loadMore() {
                 if (adapter.isHasMore()) {
-                    getChargeListInPeriod(maxCreateDate);
+                    getChargeListInPeriod();
                 }
             }
         });
@@ -245,25 +248,44 @@ public class TotalAnalyzeDetailFragment extends Fragment {
         }
         refreshLayout.setOnRefreshListener(() -> {
             initChargeList();
-            adapter.notifyDataSetChanged();
             refreshLayout.setRefreshing(false);
         });
     }
 
-    private void initChargeList() {
+    public void initChargeList() {
         keyList = new ArrayList<>();
         keyMapChargeList = new HashMap<>();
-        maxCreateDate = LitePal.max(Charge.class, "createDate", Long.class);
-        if (maxCreateDate != 0)
-            getChargeListInPeriod(maxCreateDate);
+        currentDate = Util.getMillionsFromString(Util.getWhen());
+        getChargeListInPeriod();
     }
 
-    private void getChargeListInPeriod(long hi) {
-        long lo = Util.getMinSearchCreateTime(hi);
-        List<Charge> charges = LitePal.select("createDate,id,passWord")
-                .where("createDate>? and createDate<=?", lo + "", hi + "")
+    private void getChargeListInPeriod() {
+        long hi = Util.getMaxSearchCreateTime(currentDate);
+        long lo = Util.getMinSearchCreateTime(currentDate);
+        List<RoomSet> roomSetList = LitePal.select("id").where("isSelect=1").find(RoomSet.class);
+        StringBuilder sbForRoomSet=new StringBuilder();
+        for (int i = 0; i < roomSetList.size(); i++) {
+            if (i < roomSetList.size() - 1) {
+                sbForRoomSet.append(roomSetList.get(i).getId() + ",");
+            }else
+                sbForRoomSet.append(roomSetList.get(i).getId());
+        }
+        List<Room> roomList = LitePal.select("id").where(String.format("roomSetId IN (%s)", sbForRoomSet.toString())).find(Room.class);
+        StringBuilder sbForRoom = new StringBuilder();
+        for (int i = 0; i < roomList.size(); i++) {
+            if (i < roomList.size() - 1) {
+                sbForRoom.append(roomList.get(i).getId() + ",");
+            }else
+                sbForRoom.append(roomList.get(i).getId());
+        }
+        List<Charge> charges = LitePal.select("createDate,id,passWord,roomId")
+                .where(String.format("createDate>=%s and createDate<=%s and roomId in (%s)", lo + "", hi + "",sbForRoom.toString()))
                 .order("createDate desc").find(Charge.class);
-        maxCreateDate = lo;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(currentDate);
+        int monthToShow = BaseActivity.getContext().getResources().getInteger(R.integer.MonthOnceShown);
+        calendar.add(Calendar.MONTH, -monthToShow);
+        currentDate = calendar.getTimeInMillis();
         putChargeInMap(charges);
     }
 

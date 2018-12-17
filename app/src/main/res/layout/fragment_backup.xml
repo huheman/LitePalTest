@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.BackupFragment">
+
+
+    <EditText
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/synBtn"
+        android:hint="请输入IP地址"
+        android:layout_margin="8dp"
+        android:id="@+id/ipET"
+        android:maxLines="1"
+        android:inputType="text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/synBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/highlightButtonTheme"
+        android:text="@string/beginSyn"
+        android:layout_margin="8dp"
+        app:layout_constraintTop_toBottomOf="@id/ipET"
+        app:layout_constraintBottom_toTopOf="@id/hintTV"
+        />
+
+    <TextView
+        android:id="@+id/hintTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center"
+        android:text="请点击开始同步按钮，或输入主机ip地址"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/synBtn" />
+
+</android.support.constraint.ConstraintLayout>

@@ -13,6 +13,7 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -52,7 +53,8 @@ public class RoomFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     public List<Room> roomList;
-    MyRoomFragmentRecyclerAdapter adapter;
+    private MyRoomFragmentRecyclerAdapter adapter;
+    private SparseBooleanArray spanMap;
 
     @BindView(R.id.vpfragment_recyclerView)
     RecyclerView recyclerView;
@@ -60,7 +62,6 @@ public class RoomFragment extends Fragment {
     @BindView(R.id.vpfragment_textView)
     TextView textView;
     private Unbinder bind;
-    private boolean isSpan;
     public RoomFragment() {
     }
 
@@ -74,10 +75,10 @@ public class RoomFragment extends Fragment {
     }
 
     public void setSpan(boolean span) {
-        isSpan = span;
-        if (recyclerView != null) {
-            recyclerView.getAdapter().notifyDataSetChanged();
+        for (int i = 0; i < roomList.size(); i++) {
+            spanMap.put(i,span);
         }
+        if (adapter!=null) adapter.notifyDataSetChanged();
     }
 
     class MyRoomFragmentRecyclerAdapter extends RecyclerSwipeAdapter<MyRoomFragmentRecyclerAdapter.ViewHolder> {
@@ -114,7 +115,7 @@ public class RoomFragment extends Fragment {
             @BindView(R.id.item_occupationTextView)
             TextView occupcationTextView;
 
-            public ViewHolder(View itemView) {
+            ViewHolder(View itemView) {
                 super(itemView);
                 ButterKnife.bind(this, itemView);
             }
@@ -138,8 +139,7 @@ public class RoomFragment extends Fragment {
         @Override
         public MyRoomFragmentRecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(getContext()).inflate(R.layout.recyclerviewofmain_item, parent, false);
-            ViewHolder viewHolder = new ViewHolder(view);
-            return viewHolder;
+            return new ViewHolder(view);
         }
 
         @Override
@@ -188,10 +188,10 @@ public class RoomFragment extends Fragment {
                 return false;
             });
             viewHolder.itemView.setOnClickListener(v -> {
-                int roomPos = ((MainActivity) getActivity()).findRoomPos(room.getRoomNum());
-                ((MainActivity) getActivity()).refreshAnalyzeFragment(roomPos);
+                spanMap.put(position,!spanMap.get(position));
+                notifyDataSetChanged();
             });
-            if (isSpan) {
+            if (spanMap.get(position)) {
                 viewHolder.detailTipsTextView.setVisibility(View.VISIBLE);
                 viewHolder.detailTextView.setVisibility(View.VISIBLE);
             } else {
@@ -215,6 +215,7 @@ public class RoomFragment extends Fragment {
         RoomFragment fragment = new RoomFragment();
         Util.sort(roomList);
         fragment.roomList = roomList;
+        fragment.spanMap=new SparseBooleanArray();
         return fragment;
     }
 
@@ -248,7 +249,6 @@ public class RoomFragment extends Fragment {
                     BaseActivity.show("请先生成账单");
                     break;
                 }
-
                 viewHolder.paidInWeChatTextView.setVisibility(View.VISIBLE);
                 charge.setPaidOnWechat(true).save();
                 break;

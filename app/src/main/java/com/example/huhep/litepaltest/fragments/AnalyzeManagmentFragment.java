@@ -1,8 +1,6 @@
 package com.example.huhep.litepaltest.fragments;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,18 +9,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.example.huhep.litepaltest.BaseActivity;
 import com.example.huhep.litepaltest.CustomToolbar;
 import com.example.huhep.litepaltest.MainActivity;
 import com.example.huhep.litepaltest.R;
+import com.example.huhep.litepaltest.SelectRoomsetActivity;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.utils.Util;
 
@@ -86,6 +82,7 @@ public class AnalyzeManagmentFragment extends Fragment {
 
     public void setupView() {
         List<Room> roomList = LitePal.findAll(Room.class);
+        Util.sort(roomList);
         setupView(roomList, true);
     }
 
@@ -110,7 +107,8 @@ public class AnalyzeManagmentFragment extends Fragment {
 
     private void setupToolbar() {
         customToolbar.setTitle("历史记录");
-        customToolbar.getToolbar().getMenu().add("查找").setIcon(R.drawable.ic_search).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        customToolbar.getToolbar().getMenu().add("查找").setIcon(R.drawable.ic_search).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        customToolbar.getToolbar().getMenu().add("筛选").setIcon(R.drawable.ic_choose).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         customToolbar.getToolbar().getMenu().add("刷新").setIcon(R.drawable.ic_refresh).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         customToolbar.getToolbar().setOnMenuItemClickListener(item -> {
             switch (item.toString()) {
@@ -119,6 +117,9 @@ public class AnalyzeManagmentFragment extends Fragment {
                     break;
                 case "刷新":
                     setupView();
+                    break;
+                case "筛选":
+                    startActivityForResult(new Intent(getContext(), SelectRoomsetActivity.class), BaseActivity.REQUEST_FROM_AnalyzeManagment_TO_SelectRoomSet);
                     break;
             }
             return false;
@@ -141,5 +142,15 @@ public class AnalyzeManagmentFragment extends Fragment {
         this.roomPos = roomPos;
         if (viewPager != null)
             viewPager.setCurrentItem(roomPos);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == BaseActivity.REQUEST_FROM_AnalyzeManagment_TO_SelectRoomSet
+                && resultCode == BaseActivity.RESULT_FROM_SelectRoomSet_TO_AnalyzeManagment) {
+            if (viewPager.getCurrentItem() - viewPager.getOffscreenPageLimit() <= 0) {
+                ((TotalAnalyzeDetailFragment) fragmentList.get(0)).initChargeList();
+            }
+        }
     }
 }

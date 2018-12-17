@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.huhep.litepaltest">
-    <uses-feature android:name="android.hardware.usb.host"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name="org.litepal.LitePalApplication"
         android:allowBackup="true"
@@ -13,41 +15,39 @@
         <activity
             android:name=".DetailActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden">
-
-        </activity>
+            android:windowSoftInputMode="stateHidden"></activity>
         <activity android:name=".BaseActivity" />
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
-            android:screenOrientation="portrait"
-            >
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".NewRoomActivity"
             android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".NewChargeActivity"
+            android:parentActivityName=".ChargeManageActivity"></activity>
+        <activity
+            android:name=".ChargeManageActivity"
+            android:parentActivityName=".MainActivity"></activity>
 
-        </activity>
-        <activity android:name=".NewChargeActivity"
-            android:parentActivityName=".ChargeManageActivity">
-
-        </activity>
-        <activity android:name=".ChargeManageActivity"
-            android:parentActivityName=".MainActivity">
-
-        </activity>
         <provider
-            android:authorities="com.example.huhep.litepaltest"
             android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.example.huhep.litepaltest"
             android:grantUriPermissions="true">
-            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_provider"/>
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider" />
         </provider>
 
+        <activity android:name=".SelectRoomsetActivity"></activity>
     </application>
 
 </manifest>

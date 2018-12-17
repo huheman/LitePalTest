@@ -57,6 +57,9 @@ public class Charge extends LitePalSupport {
         return passWord;
     }
 
+    public void setCreateDate(long createDate) {
+        this.createDate = createDate;
+    }
 
     public long getCreateDate() {
         return createDate;
@@ -85,7 +88,7 @@ public class Charge extends LitePalSupport {
 
     public List<Bill> getBillList() {
         if (billList == null) {
-            billList = LitePal.where("charge_Id=?", String.valueOf(id)).find(Bill.class);
+            billList = LitePal.where("chargeId=?", String.valueOf(id)).find(Bill.class);
         }
         return billList;
     }

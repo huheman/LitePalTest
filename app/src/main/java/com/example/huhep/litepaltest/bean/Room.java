@@ -36,8 +36,6 @@ public class Room extends LitePalSupport implements Parcelable {
     private int isOccupy;
     private long roomSetId;
     private double deposit;
-    private Charge lastCharge;
-    private List<BillType> checkBillTypeList;
 
     public void setRoomSet_id(long roomSet_id) {
         this.roomSetId = roomSet_id;
@@ -167,13 +165,9 @@ public class Room extends LitePalSupport implements Parcelable {
     }
 
     public Charge getLastCharge() {
-        List<Charge> charges = LitePal.where("roomId=?", String.valueOf(id)).find(Charge.class);
+        List<Charge> charges = LitePal.where("roomId=?", String.valueOf(id)).order("createDate desc").limit(1).find(Charge.class);
         if (charges.size() == 0) return null;
-        Charge lastCharge = charges.get(0);
-        for (Charge charge1 : charges)
-            if (charge1.getCreateDate() > lastCharge.getCreateDate())
-                lastCharge = charge1;
-        return lastCharge;
+        return charges.get(0);
     }
 
 

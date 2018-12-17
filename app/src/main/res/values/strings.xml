@@ -8,6 +8,9 @@
     <string name="title_new">新建</string>
     <string name="title_output">生成</string>
     <string name="title_backup">备份</string>
+    <string name="beginSyn">开始同步</string>
+    <string name="stopSyn">停止同步</string>
+    <string name="normalhintText">"请点击同步按钮，或输入主机ip地址"</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="itemText_template_data">上次结算日期是%s。\n电表读数是 %d 度，用了 %d 度，合计 %.2f 元。\n水表读数是 %d 度，用了 %d 度,合计 %.2f 元。\n房租是 %.2f 元\n共 %.2f 元</string>

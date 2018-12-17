@@ -18,7 +18,11 @@ public class BaseActivity extends AppCompatActivity {
     public static final int REQUEST_FROM_MAINFRAGMENT_TO_CHARGEMANAG = 345;
     public static final int REQUEST_FROM_CHARGEMANAG_TO_NEWCHARGE = 456;
     public static final int REQUEST_FROM_BILLMANAGE_TO_CHARGEMANAGE = 567;
+    public static final int REQUEST_FROM_AnalyzeManagment_TO_SelectRoomSet = 678;
+    public static final int RESULT_FROM_SelectRoomSet_TO_AnalyzeManagment = 876;
+
     public static final int RESULT_FROM_NEWROOM_TO_MAINFRAGMENT=321;
+
     public static final int RESULT_FROM_NEWCHARGE_TO_CHARGEMANG = 654;
     public static final int RESULT_FROM_CHARGEMANG_TOMAINFRAGMENT = 543;
     public static final String WHEN_KEY_FOR_SHP = "when";

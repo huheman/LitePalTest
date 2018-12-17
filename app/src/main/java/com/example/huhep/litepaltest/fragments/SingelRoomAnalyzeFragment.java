@@ -77,6 +77,9 @@ public class SingelRoomAnalyzeFragment extends Fragment {
                     roomViewHolder.roomNameTV.setTextColor(getContext().getResources().getColor(android.R.color.holo_red_light));
                 }
             } else roomViewHolder.timeTV.setText(charge.getCreateDateToString());
+            if (charge.haspainOnWechat())
+                roomViewHolder.paidinWechatTV.setVisibility(View.VISIBLE);
+            else roomViewHolder.paidinWechatTV.setVisibility(View.INVISIBLE);
             roomViewHolder.shareButton.setEnabled(true);
             roomViewHolder.shareButton.setOnClickListener(v -> {
                 Intent intent = new Intent();
@@ -137,7 +140,7 @@ public class SingelRoomAnalyzeFragment extends Fragment {
                 roomNameTV.setText(room.getRoomNum());
                 roomNameTipTV.setText("房间名:");
                 paidinWechatTV.setVisibility(View.INVISIBLE);
-                occupationTV.setVisibility(View.INVISIBLE);
+                occupationTV.setVisibility(View.GONE);
                 noteTipsTV.setVisibility(View.GONE);
                 noteTV.setVisibility(View.GONE);
                 codeTV.setVisibility(View.VISIBLE);
@@ -158,7 +161,7 @@ public class SingelRoomAnalyzeFragment extends Fragment {
 
     private void getMoreChargeFromRoom() {
         int limit = BaseActivity.getContext().getResources().getInteger(R.integer.MonthOnceShown);
-        List<Charge> chargeJustCreate = LitePal.select("createDate,passWord,describe,chargeType,image,roomId").where("roomId=?", room.getId() + "").order("createDate desc").offset(offset).limit(limit).find(Charge.class);
+        List<Charge> chargeJustCreate = LitePal.select("createDate,passWord,describe,chargeType,image,roomId,paidOnWechat").where("roomId=?", room.getId() + "").order("createDate desc").offset(offset).limit(limit).find(Charge.class);
         if (adapter != null) {
             if (chargeJustCreate.size() < limit) adapter.setHasMore(false);
             else adapter.setHasMore(true);
@@ -175,7 +178,6 @@ public class SingelRoomAnalyzeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_singel_room_analyze, container, false);
         ButterKnife.bind(this, view);
         adapter = new TotalAnalyzeDetailFragment.TotalAutoLoadAdapter(new SingleRoomAnalyzeAdapter());

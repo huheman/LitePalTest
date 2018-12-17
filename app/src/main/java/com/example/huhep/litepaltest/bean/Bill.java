@@ -20,7 +20,7 @@ public class Bill extends LitePalSupport {
     private double fromDegree;
     private double toDegree;
     private BillType billType;
-    private long charge_Id;
+    private long chargeId;
     private Bill lastBill;
     public static final int BILL_ALL_OK = 0;
     public static final int BILL_NOTREADY_RENT = 5;
@@ -29,7 +29,6 @@ public class Bill extends LitePalSupport {
     public static final int BILL_NOT_INIT = 30;
     public static final int BILL_TOO_MUCH = 40;
     public static final int BILL_ERROR = 50;
-
 
     public long getBillType_id() {
         return billTypeId;
@@ -130,7 +129,11 @@ public class Bill extends LitePalSupport {
     }
 
     public long getCharge_Id() {
-        return charge_Id;
+        return chargeId;
+    }
+
+    public void setCharge_Id(long chargeId) {
+        this.chargeId = chargeId;
     }
 
     private void createDate(Room room, BillType billType) {

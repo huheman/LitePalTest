@@ -318,7 +318,7 @@ public class PreviewFragment extends Fragment {
                 .setMessage("即将打印" + countToSave + "条数据,\n请把打印机数据线与手机连接...")
                 .setPositiveButton("确认", (dialog, which) -> {
                     dialog.dismiss();
-                    saveAndPrintBills();
+                    new Thread(() -> saveAndPrintBills()).start();
                 }).setView(textView)
                 .setNegativeButton("取消", null)
                 .create();
@@ -330,10 +330,16 @@ public class PreviewFragment extends Fragment {
     }
 
     private void saveAndPrintBills() {
-
         List<String> dataForPrint = new ArrayList<>();
         for (long roomid : BillManageFragment.getRoomsToShow()) {
             Charge charge = chargeMap.get(roomid);
+            charge.createDescrib();
+            dataForPrint.add(charge.createImage(getContext()));
+            charge.setPaidOnWechat(false);
+            charge.setCreateDate(System.currentTimeMillis());
+            charge.save();
+            charge.clearSP();
+
             List<Bill> usedBillList = charge.getUsedBillList();
             if (usedBillList.size() == 0) continue;
             for (Bill bill : usedBillList) {
@@ -342,17 +348,14 @@ public class PreviewFragment extends Fragment {
                         type == Bill.BILL_TOO_MUCH ||
                         type == Bill.BILL_SET_BASEDEGREE ||
                         type == Bill.BILL_NOT_DEFINE) {
+                    bill.setCharge_Id(charge.getId());
                     bill.save();
                 }
             }
-            charge.createDescrib();
-            dataForPrint.add(charge.createImage(getContext()));
-            charge.setPaidOnWechat(false);
-            charge.save();
-            charge.clearSP();
+
         }
         if (onBillsSavedListener != null) {
-            onBillsSavedListener.onBillSaved();
+            getActivity().runOnUiThread(() -> onBillsSavedListener.onBillSaved());
         }
         if (dataForPrint.size() > 0)
             beginToPrint(dataForPrint);

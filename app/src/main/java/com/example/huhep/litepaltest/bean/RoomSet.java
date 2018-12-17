@@ -12,6 +12,7 @@ public class RoomSet extends LitePalSupport {
     private String roomSetName;
     private List<Room> roomList=new ArrayList<>();
     private int isPublic;
+    private int isSelect;
 
     public boolean isPublic() {
         return isPublic==1;
@@ -33,6 +34,7 @@ public class RoomSet extends LitePalSupport {
 
     public RoomSet(String roomSetName) {
         this.roomSetName = roomSetName;
+        this.isSelect = 1;
     }
 
     public String getRoomSetName() {
@@ -55,4 +57,15 @@ public class RoomSet extends LitePalSupport {
         return roomList;
     }
 
+    public boolean isSelect() {
+        return isSelect == 1;
+    }
+
+    public void setSelect(boolean isSelect) {
+        if (isSelect) {
+            this.isSelect = 1;
+        } else {
+            this.isSelect = 2;
+        }
+    }
 }

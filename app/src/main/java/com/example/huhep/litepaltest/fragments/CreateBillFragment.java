@@ -194,8 +194,6 @@ public class CreateBillFragment extends Fragment {
             if (lastBill != null) {
                 if (charge != null && charge.getCreateDateToString().equalsIgnoreCase(Util.getWhen())) {
                     preDegree = String.valueOf(lastBill.getFromDegree());
-                    if(charge.getChargeType() == Charge.TYPE_MOVE_OUT)
-                        preDegree= String.valueOf(lastBill.getToDegree());
                 } else {
                     preDegree = String.valueOf(lastBill.getToDegree());
                 }

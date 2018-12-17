@@ -23,6 +23,7 @@ import com.example.huhep.litepaltest.bean.RoomSet;
 
 import org.litepal.LitePal;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -305,14 +306,60 @@ public class Util {
         return (int) (inch * dpi);
     }
 
-    public static long getMinSearchCreateTime(long maxSearchCreateTime){
-        long millionsFromString = Util.getMillionsFromString(getWhen(maxSearchCreateTime));
+    public static long getMinSearchCreateTime(long currentDate){
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(millionsFromString);
+        calendar.setTimeInMillis(currentDate);
         int monthToShow = BaseActivity.getContext().getResources().getInteger(R.integer.MonthOnceShown);
-        calendar.add(Calendar.MONTH, -monthToShow);
-        calendar.add(Calendar.DAY_OF_MONTH, -15);
+        calendar.add(Calendar.MONTH, -monthToShow-1);
+        calendar.add(Calendar.DAY_OF_MONTH, 16);
         return calendar.getTimeInMillis();
+    }
+
+    public static long getMaxSearchCreateTime(long currentDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(currentDate);
+        calendar.add(Calendar.DAY_OF_MONTH, 15);
+        return calendar.getTimeInMillis();
+    }
+
+    public static File getDatabaseFile() {
+        String parent = BaseActivity.getContext().getFilesDir().getParent();
+        String s = parent + File.separator + "databases" + File.separator + "demo.db";
+        return new File(s);
+
+    }public static File getTempDatabaseFile() {
+        String parent = BaseActivity.getContext().getFilesDir().getParent();
+        String s = parent + File.separator + "databases" + File.separator + "demo_temp.db";
+        return new File(s);
+    }
+
+    public static byte[] longToByte(long num) {
+        byte[] b = new byte[8];
+        for (int i = 0; i < b.length; i++) {
+            b[i] = (byte) ((num >> ((7 - i) * 8)) & 0xff);
+        }
+        return b;
+    }
+
+    public static long byteToLong(byte[] bytes) {
+        long num = 0;
+        for (int i = 0; i < 8; i++) {
+            num <<= 8;
+            num |= (bytes[i] & 0xff);
+        }
+        return num;
+    }
+
+    public static int findRoomPos(String s) {
+        List<Room> roomList = LitePal.select("roomNum").find(Room.class);
+        int roomPos = -1;
+        for (int i = 0; i < roomList.size(); i++) {
+            if (s.equals(roomList.get(i).getRoomNum())) {
+                roomPos = i + 1;
+                break;
+            }
+        }
+        return roomPos;
     }
 }
 

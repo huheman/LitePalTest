@@ -31,6 +31,7 @@ import com.example.huhep.litepaltest.bean.Charge;
 import com.example.huhep.litepaltest.bean.Room;
 import com.example.huhep.litepaltest.bean.RoomSet;
 import com.example.huhep.litepaltest.fragments.AnalyzeManagmentFragment;
+import com.example.huhep.litepaltest.fragments.BackupFragment;
 import com.example.huhep.litepaltest.fragments.BillManageFragment;
 import com.example.huhep.litepaltest.fragments.MainFragment;
 import com.example.huhep.litepaltest.fragments.PreviewFragment;
@@ -42,6 +43,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.example.huhep.litepaltest.utils.Util.findRoomPos;
 
 public class MainActivity extends BaseActivity {
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -84,14 +87,12 @@ public class MainActivity extends BaseActivity {
                 }
                 transaction.show(activity.analyzeManagmentFragment).commit();
                 break;
-
             case R.id.navigation_backup:
-                /*LitePal.deleteAll(Charge.class);
-                LitePal.deleteAll(Bill.class);
-                LitePal.deleteAll(RoomSet.class);
-                LitePal.deleteAll(BillType.class);
-                LitePal.deleteAll(Room.class);
-                activity.mainFragment.setupTheRooms();*/
+                if (activity.backupFragment == null) {
+                    activity.backupFragment = new BackupFragment();
+                    transaction.add(R.id.main_constraintLayout, activity.backupFragment);
+                }
+                transaction.show(activity.backupFragment).commit();
                 break;
         }
         return true;
@@ -102,12 +103,14 @@ public class MainActivity extends BaseActivity {
         if (billManageFragment != null) transaction.hide(billManageFragment);
         if (previewFragment != null) transaction.hide(previewFragment);
         if (analyzeManagmentFragment != null) transaction.hide(analyzeManagmentFragment);
+        if (backupFragment!=null) transaction.hide(backupFragment);
     }
 
     private FragmentManager fragmentManager;
     private MainFragment mainFragment;
     private BillManageFragment billManageFragment;
     private PreviewFragment previewFragment;
+    private BackupFragment backupFragment;
     private AnalyzeManagmentFragment analyzeManagmentFragment;
     @BindView(R.id.navigation)
     BottomNavigationView navigationView;
@@ -123,6 +126,7 @@ public class MainActivity extends BaseActivity {
     public PreviewFragment getPreviewFragment() {
         return previewFragment;
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -152,9 +156,6 @@ public class MainActivity extends BaseActivity {
 
     public void refreshAnalyzeFragment(int roomPos) {
         navigationView.setSelectedItemId(R.id.navigation_analize);
-        if (analyzeManagmentFragment.getViewPager() != null) {
-            analyzeManagmentFragment.setupView();
-        }
         analyzeManagmentFragment.showRoomAndCharge(roomPos);
     }
 
@@ -177,14 +178,14 @@ public class MainActivity extends BaseActivity {
                         refreshAnalyzeFragment(roomPos);
                         return;
                     }
-                    List<Charge> chargeList = LitePal.select("image").where("passWord=?",s).find(Charge.class);
+                    List<Charge> chargeList = LitePal.select("image").where("passWord=?", s).find(Charge.class);
                     if (chargeList.size() > 0) {
                         Charge charge = chargeList.get(0);
                         Bitmap bitmap = BitmapFactory.decodeFile(charge.getImage());
                         ImageView imageView = new ImageView(getContext());
                         imageView.setImageBitmap(bitmap);
                         imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                        imageView.setLayoutParams(new ViewGroup.LayoutParams(-1,-2));
+                        imageView.setLayoutParams(new ViewGroup.LayoutParams(-1, -2));
                         new AlertDialog.Builder(getContext()).setView(imageView).show();
                         return;
                     }
@@ -192,15 +193,5 @@ public class MainActivity extends BaseActivity {
                 }).setNegativeButton("取消", null).show();
     }
 
-    public int findRoomPos(String s) {
-        List<Room> roomList = LitePal.select("roomNum").find(Room.class);
-        int roomPos = -1;
-        for (int i = 0; i < roomList.size(); i++) {
-            if (s.equals(roomList.get(i).getRoomNum())) {
-                roomPos = i + 1;
-                break;
-            }
-        }
-        return roomPos;
-    }
+
 }
